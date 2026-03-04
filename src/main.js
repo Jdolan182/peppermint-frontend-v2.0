@@ -6,9 +6,16 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
-const app = createApp(App)
+//set api url
+import axios from "axios";
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
+axios.defaults.withCredentials = true
+axios.defaults.withXSRFToken = true
+axios.defaults.headers.common['Access-Control-Allow-Origin', '*#']
 
-app.use(createPinia())
-app.use(router)
+const peppermint = createApp(App)
 
-app.mount('#app')
+peppermint.use(createPinia())
+peppermint.use(router)
+
+peppermint.mount('#app')
