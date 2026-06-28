@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { displayFormErrors } from "@/composables/errors";
-//import { useAuthStore } from "@/store/admin/auth";
-//import { useConsumerAuthStore } from "@/store/frontend/consumerAuth";
+import { useAuthStore } from "@/store/admin/auth";
+import { useConsumerAuthStore } from "@/store/consumer/auth";
 
 
 // Axios requests
@@ -136,19 +136,16 @@ const useAxios = {
     processError: async (
       error
     ) => {
+      if (error.response?.status === 401) {
+        const adminAuth = useAuthStore()
+        const consumerAuth = useConsumerAuthStore()
 
-      if(error.response.request.status == 401){
-       // const authStore = useAuthStore();
-       // const consumerAuthStore = useConsumerAuthStore();
-
-       // if(authStore.getIsLoggedIn){
-       //   authStore.logout()
-      //  }
-       // else if(consumerAuthStore.getIsLoggedIn){
-       //   consumerAuthStore.logoutConsumer()
-      //  }
+        if (adminAuth.getIsLoggedIn) {
+          adminAuth.logout()
+        } else if (consumerAuth.getIsLoggedIn) {
+          consumerAuth.logout()
+        }
       }
-
     }
   };
   

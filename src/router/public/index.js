@@ -1,10 +1,12 @@
 import { HomeRoutes } from "./home"
+import { ConsumerAuthRoutes } from "./auth"
 
 export function getPublicRoutes() {
   if (import.meta.env.VITE_MODULE_PUBLIC !== 'true') return []
 
   const routes = [
     ...HomeRoutes,
+    ...ConsumerAuthRoutes,
   ]
 
 

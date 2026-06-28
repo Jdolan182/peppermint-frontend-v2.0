@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-full">
+  <div class="min-h-screen bg-white w-full">
     <publicHeader />
 
-    <main>
+    <main class="w-full">
       <RouterView />
     </main>
   </div>

@@ -18,7 +18,7 @@ export const useUserStore = defineStore('user', {
   actions: {
     setUser(data) {
         this.name = data.name;
-        this.userId = data.userId;
+        this.userId = data.id;
 
         const authStore = useAuthStore();
         authStore.setLoggedIn(true)
@@ -28,7 +28,7 @@ export const useUserStore = defineStore('user', {
         // set user permissions
     },
     async getUser() {
-        const res = await useAxios.get('api/user/getUser')
+        const res = await useAxios.get('api/admin/user')
         let data = res.data.data
 
         localStorage.setItem("userId", data.id)

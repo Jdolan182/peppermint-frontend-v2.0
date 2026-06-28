@@ -33,7 +33,7 @@ const updateMaintenanceMode = async () => {
   <adminLayout v-if="route.meta.layout === 'admin'" class="w-full bg-gray-100" />
 
   <!-- Frontend layout -->
-  <publicLayout v-else-if="route.meta.layout === 'public'" class="w-full bg-gray-100" />
+  <publicLayout v-else-if="route.meta.layout === 'public'" class="w-full" />
 
   <!-- No specific layout -->
   <RouterView v-else class="w-full bg-gray-100" />
