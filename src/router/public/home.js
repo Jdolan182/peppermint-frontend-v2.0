@@ -1,4 +1,3 @@
-
 export const HomeRoutes = [
   {
     path: '/',
@@ -6,7 +5,8 @@ export const HomeRoutes = [
     component: () => import('@/views/public/HomeView.vue'),
     meta: {
       layout: 'public',
-      nav: 'Home'
+      module: 'public',
+      nav: 'Home',
     },
   },
-];
+]

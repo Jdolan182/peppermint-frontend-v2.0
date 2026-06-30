@@ -108,8 +108,20 @@ const useAxios = {
       }
     },
   
+    put: async (url, data = {}, form = null) => {
+      try {
+        return await axios.put(url, data);
+      } catch (error) {
+        if (form) {
+          displayFormErrors(form, error);
+        }
+        useAxios.processError(error)
+        return error
+      }
+    },
+
     /**
-     *      
+     *
      * Make a patch request
      * 
      * @param {string} url
@@ -128,9 +140,9 @@ const useAxios = {
         if (form) {
           displayFormErrors(form, error);
         }
+        useAxios.processError(error)
+        return error
       }
-      useAxios.processError(error)
-      return error
     },
 
     processError: async (

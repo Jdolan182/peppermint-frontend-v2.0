@@ -1,5 +1,6 @@
 import { HomeRoutes } from "./home"
 import { ConsumerAuthRoutes } from "./auth"
+import { PublicBlogRoutes } from "./blogs"
 
 export function getPublicRoutes() {
   if (import.meta.env.VITE_MODULE_PUBLIC !== 'true') return []
@@ -8,6 +9,10 @@ export function getPublicRoutes() {
     ...HomeRoutes,
     ...ConsumerAuthRoutes,
   ]
+
+  if (import.meta.env.VITE_MODULE_BLOGS === 'true') {
+    routes.push(...PublicBlogRoutes)
+  }
 
 
   // Catch-all dynamic CMS page

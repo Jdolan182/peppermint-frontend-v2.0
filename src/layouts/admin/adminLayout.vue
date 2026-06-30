@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
     <adminSidebar />
 
     <div
@@ -18,10 +18,15 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import adminHeader from './adminHeader.vue'
 import adminSidebar from './adminSidebar.vue'
 import { useSidebarStore } from '@/store/admin/sidebar'
+import { useModulesStore } from '@/store/admin/modules'
 
 const sidebar = useSidebarStore()
+const modulesStore = useModulesStore()
+
+onMounted(() => modulesStore.fetch())
 </script>

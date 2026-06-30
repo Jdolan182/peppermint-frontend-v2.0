@@ -16,6 +16,7 @@
           </p>
           <div class="mt-10 flex items-center justify-center gap-4">
             <router-link
+              v-if="publicLoginEnabled"
               :to="{ name: 'ConsumerLogin' }"
               class="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
             >
@@ -75,6 +76,7 @@
           <h2 class="text-3xl font-bold text-white">Ready to get started?</h2>
           <p class="mt-4 text-indigo-200">Join and start managing your content today.</p>
           <router-link
+            v-if="publicLoginEnabled"
             :to="{ name: 'ConsumerLogin' }"
             class="mt-8 inline-flex items-center rounded-lg bg-white px-6 py-3 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-50 transition-colors"
           >
@@ -87,6 +89,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import {
   RectangleStackIcon,
   UsersIcon,
@@ -95,6 +98,10 @@ import {
   CubeTransparentIcon,
   ArrowPathIcon,
 } from '@heroicons/vue/24/outline'
+import { usePublicModules } from '@/composables/publicModules'
+
+const { isPublicModuleEnabled } = usePublicModules()
+const publicLoginEnabled = computed(() => isPublicModuleEnabled('public_login'))
 
 const features = [
   {

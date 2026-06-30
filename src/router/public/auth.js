@@ -5,6 +5,7 @@ export const ConsumerAuthRoutes = [
     component: () => import('@/views/public/auth/Login.vue'),
     meta: {
       skipIfConsumerAuth: true,
+      module: 'public_login',
     },
   },
 ]

@@ -76,14 +76,14 @@ const login = async ({ params, form }) => {
     </div>
 
     <!-- Right form panel -->
-    <div class="flex flex-1 flex-col items-center justify-center bg-white px-8 py-12">
+    <div class="flex flex-1 flex-col items-center justify-center bg-white dark:bg-gray-900 px-8 py-12 transition-colors duration-200">
       <div class="w-full max-w-sm">
         <!-- Mobile logo -->
         <div class="flex items-center gap-2 mb-10 lg:hidden">
           <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
             <span class="text-white font-bold text-sm">P</span>
           </div>
-          <span class="text-xl font-bold text-gray-900">{{ adminName }}</span>
+          <span class="text-xl font-bold text-gray-900 dark:text-white">{{ adminName }}</span>
         </div>
 
         <SignInForm :title="`Sign in to ${adminName}`" @login="login" />

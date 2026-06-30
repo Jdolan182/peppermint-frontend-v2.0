@@ -1,17 +1,33 @@
 import { DashboardRoutes } from "./dashboard"
 import { PeppermintRoutes } from "./peppermint"
+import { ConsumerRoutes } from "./consumers"
+import { TeamRoutes } from "./team"
+import { SettingsRoutes } from "./settings"
+import { BlogRoutes } from "./blogs"
 
 export function getAdminRoutes() {
   if (import.meta.env.VITE_MODULE_ADMIN !== 'true') return []
 
   const routes = [
     ...DashboardRoutes,
-    ...PeppermintRoutes
+    ...PeppermintRoutes,
   ]
 
-//   if (import.meta.env.VITE_MODULE_BLOG_ENABLED === 'true') {
-//     routes.push(...AdminRoutes)
-//   }
+  if (import.meta.env.VITE_MODULE_CONSUMERS === 'true') {
+    routes.push(...ConsumerRoutes)
+  }
+
+  if (import.meta.env.VITE_MODULE_TEAM === 'true') {
+    routes.push(...TeamRoutes)
+  }
+
+  if (import.meta.env.VITE_MODULE_SETTINGS === 'true') {
+    routes.push(...SettingsRoutes)
+  }
+
+  if (import.meta.env.VITE_MODULE_BLOGS === 'true') {
+    routes.push(...BlogRoutes)
+  }
 
   return routes
 }

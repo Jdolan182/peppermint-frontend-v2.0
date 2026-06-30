@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Make dark: utilities respond to .dark class on <html> instead of OS media query */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   /* color palette */
   :root {
@@ -36,18 +39,28 @@
     --section-gap: 160px;
   }
 
+  /* OS-level preference (only when no manual override is set) */
   @media (prefers-color-scheme: dark) {
-    :root {
+    html:not(.light):not(.dark) {
       --color-background: var(--vt-c-black);
       --color-background-soft: var(--vt-c-black-soft);
       --color-background-mute: var(--vt-c-black-mute);
-
       --color-border: var(--vt-c-divider-dark-2);
       --color-border-hover: var(--vt-c-divider-dark-1);
-
       --color-heading: var(--vt-c-text-dark-1);
       --color-text: var(--vt-c-text-dark-2);
     }
+  }
+
+  /* Manual dark mode */
+  html.dark {
+    --color-background: var(--vt-c-black);
+    --color-background-soft: var(--vt-c-black-soft);
+    --color-background-mute: var(--vt-c-black-mute);
+    --color-border: var(--vt-c-divider-dark-2);
+    --color-border-hover: var(--vt-c-divider-dark-1);
+    --color-heading: var(--vt-c-text-dark-1);
+    --color-text: var(--vt-c-text-dark-2);
   }
 
   html,

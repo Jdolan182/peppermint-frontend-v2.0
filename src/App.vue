@@ -2,30 +2,28 @@
 import { RouterView, useRoute } from "vue-router";
 
 import adminLayout from "./layouts/admin/adminLayout.vue";
-import maintenanceLayout from "./layouts/maintenance/maintenanceLayout.vue";
 import publicLayout from "./layouts/public/publicLayout.vue";
 import Banner from "@/components/banners/Banner.vue";
-import { ref, computed } from "vue";
+import { onMounted, onUnmounted } from "vue";
+import { useThemeStore } from "@/store/theme";
 
 const route = useRoute();
 
-const maintenanceMode = import.meta.env.VITE_MAINTENANCE_MODE;
+const themeStore = useThemeStore()
 
-const showMaintenanceMode = ref(0);
-
-if (maintenanceMode === "true") {
-  const maintenanceStore = useMaintenanceStore();
-  const maintenanceMode = computed(() => maintenanceStore.getShowMaintenanceMode);
-
-  showMaintenanceMode.value = maintenanceMode.value;
-} else {
-  showMaintenanceMode.value = 0;
+const systemMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+const onSystemChange = () => {
+  if (themeStore.preference === 'system') themeStore.apply()
 }
 
-const updateMaintenanceMode = async () => {
-  showMaintenanceMode.value = 0;
-};
+onMounted(() => {
+  themeStore.apply()
+  systemMediaQuery.addEventListener('change', onSystemChange)
+})
 
+onUnmounted(() => {
+  systemMediaQuery.removeEventListener('change', onSystemChange)
+})
 </script>
 
 <template>
