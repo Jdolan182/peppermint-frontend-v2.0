@@ -125,6 +125,7 @@ const allModules = [
   { key: 'module_public_login', envKey: 'VITE_MODULE_PUBLIC_LOGIN', label: 'Public login', description: 'Lets visitors sign in or sign up on the public site.' },
   { key: 'module_team',         envKey: 'VITE_MODULE_TEAM',         label: 'Team',         description: 'Admin user management and team roles.' },
   { key: 'module_public',       envKey: 'VITE_MODULE_PUBLIC',       label: 'Public',       description: 'The consumer-facing public site.' },
+  { key: 'module_pages',        envKey: 'VITE_MODULE_PAGES',        label: 'Pages',        description: 'Page builder — create and publish custom pages.' },
 ]
 
 const licensedModules = computed(() =>
@@ -142,6 +143,7 @@ const form = ref({
   module_public_login: true,
   module_team: true,
   module_public: true,
+  module_pages: true,
 })
 
 const saving = ref(false)
@@ -162,6 +164,7 @@ onMounted(async () => {
     form.value.module_public_login  = s.module_public_login  !== 'false'
     form.value.module_team          = s.module_team          !== 'false'
     form.value.module_public        = s.module_public        !== 'false'
+    form.value.module_pages         = s.module_pages         !== 'false'
   }
 })
 

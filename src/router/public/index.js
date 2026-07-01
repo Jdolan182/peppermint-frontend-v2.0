@@ -14,16 +14,22 @@ export function getPublicRoutes() {
     routes.push(...PublicBlogRoutes)
   }
 
+  if (import.meta.env.VITE_MODULE_PAGES === 'true') {
+    routes.push({
+      path: '/preview/:id',
+      name: 'PagePreview',
+      component: () => import('@/views/public/pages/PagePreview.vue'),
+      meta: { layout: 'public', module: 'public' },
+    })
 
-  // Catch-all dynamic CMS page
-//   routes.push({
-//     path: '/:slug',
-//     name: 'DynamicPage',
-//     component: () => import('@/views/frontend/pages/PageTemplate.vue'),
-//     meta: {
-//       layout: 'frontend'
-//     }
-//   })
+    // Catch-all — must be last so named routes take priority
+    routes.push({
+      path: '/:slug',
+      name: 'DynamicPage',
+      component: () => import('@/views/public/pages/DynamicPage.vue'),
+      meta: { layout: 'public', module: 'pages' },
+    })
+  }
 
   return routes
 }

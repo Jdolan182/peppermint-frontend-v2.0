@@ -35,7 +35,12 @@
           :title="collapsed ? item.name : undefined"
         >
           <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
-          <span v-if="!collapsed">{{ item.name }}</span>
+          <span v-if="!collapsed" class="flex-1">{{ item.name }}</span>
+          <span
+            v-if="!collapsed && item.badge && item.badge() > 0"
+            class="rounded-full px-1.5 py-0.5 text-xs font-semibold leading-none"
+            :class="isActive(item.routeName) ? 'bg-white/20 text-white' : 'bg-indigo-500/20 text-indigo-400'"
+          >{{ item.badge() }}</span>
         </router-link>
       </template>
     </nav>
@@ -58,11 +63,12 @@
 
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/admin/auth'
 import { useModulesStore } from '@/store/admin/modules'
-import { HomeIcon, UsersIcon, UserGroupIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, NewspaperIcon, TagIcon } from '@heroicons/vue/24/outline'
+import { useAxios } from '@/composables/request'
+import { HomeIcon, UsersIcon, UserGroupIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, NewspaperIcon, TagIcon, DocumentTextIcon, GlobeAltIcon, EnvelopeIcon } from '@heroicons/vue/24/outline'
 import DarkModeToggle from '@/components/buttons/DarkModeToggle.vue'
 
 defineProps({
@@ -76,6 +82,18 @@ const modulesStore = useModulesStore()
 const siteName = computed(() => modulesStore.settings.site_name || import.meta.env.VITE_MODULE_ADMIN_NAME || 'Peppermint')
 const dashboardName = import.meta.env.VITE_MODULE_ADMIN_DASHBOARD_NAME
 
+const contactUnread = ref(0)
+
+async function fetchUnreadCount() {
+  if (modulesStore.isEnabled('pages')) {
+    const res = await useAxios.get('/api/admin/contact/unread-count')
+    contactUnread.value = res?.data?.count ?? 0
+  }
+}
+
+onMounted(fetchUnreadCount)
+watch(() => route.path, fetchUnreadCount)
+
 // module is the short name e.g. 'blogs', null means always visible
 const allNav = [
   { name: dashboardName, routeName: 'Dashboard', icon: HomeIcon, module: null },
@@ -83,6 +101,10 @@ const allNav = [
   { type: 'section', label: 'Content', module: 'blogs' },
   { name: 'Blogs', routeName: 'Blogs', icon: NewspaperIcon, module: 'blogs' },
   { name: 'Categories', routeName: 'BlogCategories', icon: TagIcon, module: 'blogs' },
+  { type: 'section', label: 'Pages', module: 'pages' },
+  { name: 'Pages', routeName: 'Pages', icon: DocumentTextIcon, module: 'pages' },
+  { name: 'Footer', routeName: 'FooterEditor', icon: GlobeAltIcon, module: 'pages' },
+  { name: 'Contact', routeName: 'ContactSubmissions', icon: EnvelopeIcon, module: 'pages', badge: () => contactUnread.value },
   { type: 'section', label: 'Team', module: 'team' },
   { name: 'Admin Users', routeName: 'AdminUsers', icon: UserGroupIcon, module: 'team' },
   { name: 'Settings', routeName: 'Settings', icon: Cog6ToothIcon, module: 'settings' },

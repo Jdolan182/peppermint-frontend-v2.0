@@ -4,6 +4,7 @@ import { ConsumerRoutes } from "./consumers"
 import { TeamRoutes } from "./team"
 import { SettingsRoutes } from "./settings"
 import { BlogRoutes } from "./blogs"
+import { PagesRoutes } from "./pages"
 
 export function getAdminRoutes() {
   if (import.meta.env.VITE_MODULE_ADMIN !== 'true') return []
@@ -27,6 +28,10 @@ export function getAdminRoutes() {
 
   if (import.meta.env.VITE_MODULE_BLOGS === 'true') {
     routes.push(...BlogRoutes)
+  }
+
+  if (import.meta.env.VITE_MODULE_PAGES === 'true') {
+    routes.push(...PagesRoutes)
   }
 
   return routes

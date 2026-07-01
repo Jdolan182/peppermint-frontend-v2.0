@@ -2,7 +2,7 @@ export const HomeRoutes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/views/public/HomeView.vue'),
+    component: () => import('@/views/public/pages/HomePage.vue'),
     meta: {
       layout: 'public',
       module: 'public',
