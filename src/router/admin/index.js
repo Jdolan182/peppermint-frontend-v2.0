@@ -5,6 +5,9 @@ import { TeamRoutes } from "./team"
 import { SettingsRoutes } from "./settings"
 import { BlogRoutes } from "./blogs"
 import { PagesRoutes } from "./pages"
+import { TasksRoutes } from "./tasks"
+import { RoadmapRoutes } from "./roadmap"
+import { CalendarRoutes } from "./calendar"
 
 export function getAdminRoutes() {
   if (import.meta.env.VITE_MODULE_ADMIN !== 'true') return []
@@ -32,6 +35,18 @@ export function getAdminRoutes() {
 
   if (import.meta.env.VITE_MODULE_PAGES === 'true') {
     routes.push(...PagesRoutes)
+  }
+
+  if (import.meta.env.VITE_MODULE_TASKS === 'true') {
+    routes.push(...TasksRoutes)
+  }
+
+  if (import.meta.env.VITE_MODULE_ROADMAP === 'true') {
+    routes.push(...RoadmapRoutes)
+  }
+
+  if (import.meta.env.VITE_MODULE_TASKS === 'true' || import.meta.env.VITE_MODULE_ROADMAP === 'true') {
+    routes.push(...CalendarRoutes)
   }
 
   return routes

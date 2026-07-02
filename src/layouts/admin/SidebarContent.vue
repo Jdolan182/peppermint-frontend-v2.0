@@ -68,7 +68,7 @@ import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/admin/auth'
 import { useModulesStore } from '@/store/admin/modules'
 import { useAxios } from '@/composables/request'
-import { HomeIcon, UsersIcon, UserGroupIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, NewspaperIcon, TagIcon, DocumentTextIcon, GlobeAltIcon, EnvelopeIcon } from '@heroicons/vue/24/outline'
+import { HomeIcon, UsersIcon, UserGroupIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, NewspaperIcon, TagIcon, DocumentTextIcon, GlobeAltIcon, EnvelopeIcon, CheckCircleIcon, MapIcon, CalendarDaysIcon } from '@heroicons/vue/24/outline'
 import DarkModeToggle from '@/components/buttons/DarkModeToggle.vue'
 
 defineProps({
@@ -100,18 +100,27 @@ const allNav = [
   { name: 'Consumers', routeName: 'Consumers', icon: UsersIcon, module: 'consumers' },
   { type: 'section', label: 'Content', module: 'blogs' },
   { name: 'Blogs', routeName: 'Blogs', icon: NewspaperIcon, module: 'blogs' },
-  { name: 'Categories', routeName: 'BlogCategories', icon: TagIcon, module: 'blogs' },
   { type: 'section', label: 'Pages', module: 'pages' },
   { name: 'Pages', routeName: 'Pages', icon: DocumentTextIcon, module: 'pages' },
   { name: 'Footer', routeName: 'FooterEditor', icon: GlobeAltIcon, module: 'pages' },
   { name: 'Contact', routeName: 'ContactSubmissions', icon: EnvelopeIcon, module: 'pages', badge: () => contactUnread.value },
+  { type: 'section', label: 'Work', module: ['tasks', 'roadmap'] },
+  { name: 'Tasks', routeName: 'Tasks', icon: CheckCircleIcon, module: 'tasks' },
+  { name: 'Roadmap', routeName: 'Roadmap', icon: MapIcon, module: 'roadmap' },
+  { name: 'Calendar', routeName: 'Calendar', icon: CalendarDaysIcon, module: ['tasks', 'roadmap'] },
   { type: 'section', label: 'Team', module: 'team' },
   { name: 'Admin Users', routeName: 'AdminUsers', icon: UserGroupIcon, module: 'team' },
   { name: 'Settings', routeName: 'Settings', icon: Cog6ToothIcon, module: 'settings' },
 ]
 
+function moduleVisible(mod) {
+  if (mod === null) return true
+  if (Array.isArray(mod)) return mod.some(m => modulesStore.isEnabled(m))
+  return modulesStore.isEnabled(mod)
+}
+
 const visibleNav = computed(() => {
-  return allNav.filter(item => item.module === null || modulesStore.isEnabled(item.module))
+  return allNav.filter(item => moduleVisible(item.module))
 })
 
 const isActive = (routeName) => route.name === routeName

@@ -14,6 +14,24 @@ export function getPublicRoutes() {
     routes.push(...PublicBlogRoutes)
   }
 
+  if (import.meta.env.VITE_MODULE_ROADMAP === 'true') {
+    routes.push({
+      path: '/roadmap',
+      name: 'PublicRoadmap',
+      component: () => import('@/views/public/roadmap/PublicRoadmap.vue'),
+      meta: { layout: 'public', module: 'roadmap' },
+    })
+  }
+
+  if (import.meta.env.VITE_MODULE_TASKS === 'true') {
+    routes.push({
+      path: '/my-tasks',
+      name: 'ConsumerTasks',
+      component: () => import('@/views/consumer/ConsumerTasks.vue'),
+      meta: { layout: 'public', requiresConsumerAuth: true },
+    })
+  }
+
   if (import.meta.env.VITE_MODULE_PAGES === 'true') {
     routes.push({
       path: '/preview/:id',

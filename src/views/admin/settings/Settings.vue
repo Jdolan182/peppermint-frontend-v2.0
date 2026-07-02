@@ -5,8 +5,21 @@
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage your application settings</p>
     </div>
 
-    <div class="mt-8 space-y-6">
+    <!-- Tab nav -->
+    <div class="mt-6 flex gap-0.5 border-b border-gray-200 dark:border-gray-700">
+      <button
+        v-for="tab in visibleTabs"
+        :key="tab.id"
+        @click="activeTab = tab.id"
+        class="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px"
+        :class="activeTab === tab.id
+          ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
+          : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-300'"
+      >{{ tab.label }}</button>
+    </div>
 
+    <!-- General -->
+    <div v-if="activeTab === 'general'" class="mt-8 space-y-6">
       <!-- General -->
       <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700">
         <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
@@ -56,7 +69,6 @@
               <p class="text-sm font-medium text-gray-900 dark:text-white">{{ mod.label }}</p>
               <p class="text-xs text-gray-500 dark:text-gray-400">{{ mod.description }}</p>
             </div>
-            <!-- Toggle switch -->
             <button
               type="button"
               role="switch"
@@ -74,10 +86,24 @@
         </div>
       </div>
 
-      <!-- Blog settings -->
-      <div v-if="form.module_blogs !== false" class="rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700">
+      <!-- Save -->
+      <div class="flex items-center justify-end gap-3">
+        <span v-if="saved" class="text-sm text-green-600 dark:text-green-400">Saved</span>
+        <button
+          class="rounded-lg bg-gray-900 dark:bg-white px-5 py-2 text-sm font-semibold text-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors disabled:opacity-50"
+          :disabled="saving"
+          @click="handleSave"
+        >
+          {{ saving ? 'Saving...' : 'Save changes' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Blog -->
+    <div v-else-if="activeTab === 'blog'" class="mt-8 space-y-8">
+      <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700">
         <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
-          <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Blog</h2>
+          <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Blog page</h2>
           <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">Displayed on the public blog page header</p>
         </div>
         <div class="px-6 py-5 space-y-4">
@@ -91,32 +117,61 @@
           </div>
         </div>
       </div>
-
-      <!-- Save -->
       <div class="flex items-center justify-end gap-3">
         <span v-if="saved" class="text-sm text-green-600 dark:text-green-400">Saved</span>
         <button
           class="rounded-lg bg-gray-900 dark:bg-white px-5 py-2 text-sm font-semibold text-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors disabled:opacity-50"
           :disabled="saving"
           @click="handleSave"
-        >
-          {{ saving ? 'Saving...' : 'Save changes' }}
-        </button>
+        >{{ saving ? 'Saving...' : 'Save changes' }}</button>
       </div>
+      <BlogCategoriesSettings />
+    </div>
+
+    <!-- Task Types -->
+    <div v-else-if="activeTab === 'task-types'" class="mt-8">
+      <TaskTypesSettings />
+    </div>
+
+    <!-- Roadmap Categories -->
+    <div v-else-if="activeTab === 'roadmap-categories'" class="mt-8">
+      <RoadmapCategoriesSettings />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
 import { useModulesStore } from '@/store/admin/modules'
 import { usePublicModules } from '@/composables/publicModules'
 import Input from '@/components/inputs/Input.vue'
 import Label from '@/components/labels/Label.vue'
+import TaskTypesSettings from '@/views/admin/tasks/TaskTypesSettings.vue'
+import BlogCategoriesSettings from '@/views/admin/blogs/CategoriesIndex.vue'
+import RoadmapCategoriesSettings from '@/views/admin/roadmap/RoadmapCategoriesSettings.vue'
 
 const modulesStore = useModulesStore()
 const { invalidatePublicModulesCache } = usePublicModules()
+
+const activeTab = ref('general')
+
+const allTabs = [
+  { id: 'general',             label: 'General',             moduleKey: null },
+  { id: 'blog',                label: 'Blog',                moduleKey: 'blogs' },
+  { id: 'task-types',          label: 'Task types',          moduleKey: 'tasks' },
+  { id: 'roadmap-categories',  label: 'Roadmap categories',  moduleKey: 'roadmap' },
+]
+
+const visibleTabs = computed(() =>
+  allTabs.filter(t => t.moduleKey === null || modulesStore.isEnabled(t.moduleKey))
+)
+
+watch(visibleTabs, (tabs) => {
+  if (!tabs.find(t => t.id === activeTab.value)) {
+    activeTab.value = 'general'
+  }
+})
 
 // All possible toggleable modules — only shown if licensed (env var set)
 const allModules = [
@@ -125,7 +180,12 @@ const allModules = [
   { key: 'module_public_login', envKey: 'VITE_MODULE_PUBLIC_LOGIN', label: 'Public login', description: 'Lets visitors sign in or sign up on the public site.' },
   { key: 'module_team',         envKey: 'VITE_MODULE_TEAM',         label: 'Team',         description: 'Admin user management and team roles.' },
   { key: 'module_public',       envKey: 'VITE_MODULE_PUBLIC',       label: 'Public',       description: 'The consumer-facing public site.' },
-  { key: 'module_pages',        envKey: 'VITE_MODULE_PAGES',        label: 'Pages',        description: 'Page builder — create and publish custom pages.' },
+  { key: 'module_pages',             envKey: 'VITE_MODULE_PAGES',             label: 'Pages',             description: 'Page builder — create and publish custom pages.' },
+  { key: 'module_tasks',             envKey: 'VITE_MODULE_TASKS',             label: 'Tasks',             description: 'Task management with kanban board and types.' },
+  { key: 'module_tasks_consumer',    envKey: 'VITE_MODULE_TASKS',             label: 'Tasks — consumer',  description: 'Allow consumers to view tasks assigned to them.' },
+  { key: 'module_roadmap',           envKey: 'VITE_MODULE_ROADMAP',           label: 'Roadmap',           description: 'Plan and track what\'s coming — visible to admins.' },
+  { key: 'module_roadmap_public',    envKey: 'VITE_MODULE_ROADMAP',           label: 'Roadmap — public',  description: 'Show a public-facing roadmap page to all visitors.' },
+  { key: 'module_appointments',      envKey: 'VITE_MODULE_TASKS',             label: 'Appointments',      description: 'Allow consumers to request appointments.' },
 ]
 
 const licensedModules = computed(() =>
@@ -144,6 +204,11 @@ const form = ref({
   module_team: true,
   module_public: true,
   module_pages: true,
+  module_tasks: true,
+  module_tasks_consumer: true,
+  module_roadmap: true,
+  module_roadmap_public: true,
+  module_appointments: true,
 })
 
 const saving = ref(false)
@@ -158,13 +223,17 @@ onMounted(async () => {
     form.value.maintenance_message  = s.maintenance_message  ?? ''
     form.value.blog_title           = s.blog_title           ?? ''
     form.value.blog_description     = s.blog_description     ?? ''
-    // DB stores 'true'/'false' strings; absent means default on
     form.value.module_blogs         = s.module_blogs         !== 'false'
     form.value.module_consumers     = s.module_consumers     !== 'false'
     form.value.module_public_login  = s.module_public_login  !== 'false'
     form.value.module_team          = s.module_team          !== 'false'
     form.value.module_public        = s.module_public        !== 'false'
-    form.value.module_pages         = s.module_pages         !== 'false'
+    form.value.module_pages            = s.module_pages            !== 'false'
+    form.value.module_tasks            = s.module_tasks            !== 'false'
+    form.value.module_tasks_consumer   = s.module_tasks_consumer   !== 'false'
+    form.value.module_roadmap          = s.module_roadmap          !== 'false'
+    form.value.module_roadmap_public   = s.module_roadmap_public   !== 'false'
+    form.value.module_appointments     = s.module_appointments     !== 'false'
   }
 })
 

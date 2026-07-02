@@ -51,8 +51,20 @@
           class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
         >Blog</router-link>
 
+        <!-- Roadmap link -->
+        <router-link
+          v-if="roadmapEnabled"
+          :to="{ name: 'PublicRoadmap' }"
+          class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+        >Roadmap</router-link>
+
         <div class="flex items-center gap-4">
           <template v-if="consumerAuth.getIsLoggedIn">
+            <router-link
+              v-if="tasksEnabled"
+              :to="{ name: 'ConsumerTasks' }"
+              class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            >My Tasks</router-link>
             <span class="text-sm text-gray-500">{{ userStore.getName }}</span>
             <button
               @click="consumerAuth.logout()"
@@ -82,6 +94,8 @@ const userStore = useConsumerUserStore()
 const { isPublicModuleEnabled, siteName } = usePublicModules()
 const blogsEnabled = computed(() => isPublicModuleEnabled('blogs'))
 const publicLoginEnabled = computed(() => isPublicModuleEnabled('public_login'))
+const roadmapEnabled = computed(() => isPublicModuleEnabled('roadmap'))
+const tasksEnabled = computed(() => isPublicModuleEnabled('tasks'))
 
 const navPages = ref([])
 
