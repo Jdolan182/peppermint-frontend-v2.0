@@ -32,6 +32,13 @@ export function getPublicRoutes() {
     })
   }
 
+  routes.push({
+    path: '/profile',
+    name: 'ConsumerProfile',
+    component: () => import('@/views/consumer/ConsumerProfile.vue'),
+    meta: { layout: 'public', requiresConsumerAuth: true },
+  })
+
   if (import.meta.env.VITE_MODULE_PAGES === 'true') {
     routes.push({
       path: '/preview/:id',

@@ -9,17 +9,17 @@
       <div class="flex items-center gap-2 flex-wrap">
         <div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
           <button
-            @click="view = 'timeline'"
+            @click="setView('timeline')"
             class="px-3 py-1.5 text-xs font-medium transition-colors"
             :class="view === 'timeline' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'"
           >Timeline</button>
           <button
-            @click="view = 'list'"
+            @click="setView('list')"
             class="px-3 py-1.5 text-xs font-medium transition-colors"
             :class="view === 'list' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'"
           >List</button>
           <button
-            @click="view = 'kanban'"
+            @click="setView('kanban')"
             class="px-3 py-1.5 text-xs font-medium transition-colors"
             :class="view === 'kanban' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'"
           >Kanban</button>
@@ -31,8 +31,26 @@
       </div>
     </div>
 
+    <!-- Filters -->
+    <div class="mt-5 flex flex-wrap items-center gap-3">
+      <input
+        v-model="filters.search"
+        type="text"
+        placeholder="Search…"
+        class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48"
+      />
+      <select v-model="filters.status" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="">All statuses</option>
+        <option v-for="(meta, key) in STATUS_META" :key="key" :value="key">{{ meta.label }}</option>
+      </select>
+      <select v-model="filters.assigned_admin_id" class="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="">All assignees</option>
+        <option v-for="a in admins" :key="a.id" :value="a.id">{{ a.name }}</option>
+      </select>
+    </div>
+
     <!-- Category filter (list only) -->
-    <div v-if="view === 'list' && categories.length" class="mt-5 flex flex-wrap gap-2">
+    <div v-if="view === 'list' && categories.length" class="mt-3 flex flex-wrap gap-2">
       <button
         @click="filterCategory = null"
         class="rounded-full px-3 py-1 text-xs font-medium transition-colors"
@@ -167,7 +185,7 @@
                         v-if="barSegment(item, m).isStart"
                         class="text-xs font-semibold truncate"
                         :style="{ color: statusColor(item.status) }"
-                      >{{ item.start_date ? formatShortDate(item.start_date) : formatShortDate(item.date) }}</span>
+                      >{{ formatShortDate(item.date) }}</span>
                     </div>
                   </div>
                 </td>
@@ -213,7 +231,7 @@
         </h2>
         <div class="space-y-3">
           <div
-            v-for="item in group.items"
+            v-for="(item, idx) in group.items"
             :key="item.id"
             @click="openEdit(item)"
             class="rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 px-5 py-4 cursor-pointer hover:ring-indigo-300 dark:hover:ring-indigo-600 transition-all flex items-start gap-4"
@@ -224,6 +242,61 @@
             <div class="flex-1 min-w-0">
               <div class="flex items-start justify-between gap-2">
                 <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ item.title }}</p>
+                <span class="flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium" :style="{ background: statusColor(item.status) + '22', color: statusColor(item.status) }">{{ statusLabel(item.status) }}</span>
+              </div>
+              <p v-if="item.description" class="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ item.description }}</p>
+              <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-400">
+                <span v-if="item.date">{{ formatDate(item.date) }}</span>
+                <span v-if="item.assigned_admin">{{ item.assigned_admin.name }}</span>
+                <span v-if="item.tasks?.length">{{ item.tasks.length }} task{{ item.tasks.length !== 1 ? 's' : '' }}</span>
+              </div>
+            </div>
+            <div class="flex flex-col gap-0.5 flex-shrink-0" @click.stop>
+              <button
+                :disabled="idx === 0"
+                @click="moveItem(item, -1)"
+                class="p-1 rounded text-gray-300 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-20 disabled:cursor-default transition-colors"
+                title="Move up"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
+              </button>
+              <button
+                :disabled="idx === group.items.length - 1"
+                @click="moveItem(item, 1)"
+                class="p-1 rounded text-gray-300 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-20 disabled:cursor-default transition-colors"
+                title="Move down"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Archived: shipped items older than 1 year -->
+      <div v-if="archivedItems.length">
+        <button
+          @click="archiveOpen = !archiveOpen"
+          class="flex items-center gap-2 text-sm font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+        >
+          <svg class="w-3.5 h-3.5 transition-transform" :class="archiveOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
+          Archived ({{ archivedItems.length }})
+        </button>
+        <div v-if="archiveOpen" class="space-y-3 opacity-60">
+          <div
+            v-for="item in archivedItems"
+            :key="item.id"
+            @click="openEdit(item)"
+            class="rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 px-5 py-4 cursor-pointer hover:ring-indigo-300 dark:hover:ring-indigo-600 transition-all flex items-start gap-4"
+          >
+            <div class="flex-shrink-0 mt-1">
+              <span class="w-3 h-3 rounded-full block" :style="{ background: statusColor(item.status) }" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <p class="text-sm font-semibold text-gray-900 dark:text-white line-through">{{ item.title }}</p>
                 <span class="flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium" :style="{ background: statusColor(item.status) + '22', color: statusColor(item.status) }">{{ statusLabel(item.status) }}</span>
               </div>
               <p v-if="item.description" class="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ item.description }}</p>
@@ -437,13 +510,35 @@ function scrollToToday() {
 
 // ── List / Kanban helpers ─────────────────────────────────────────────────────
 
-const filteredItems = computed(() =>
-  filterCategory.value != null ? items.value.filter(i => i.category_id === filterCategory.value) : items.value
+const archiveOpen = ref(false)
+const filters = ref({ search: '', status: '', assigned_admin_id: '' })
+
+const ONE_YEAR_AGO = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())
+
+const filteredItems = computed(() => {
+  return items.value.filter(i => {
+    if (filterCategory.value != null && i.category_id !== filterCategory.value) return false
+    if (filters.value.search && !i.title.toLowerCase().includes(filters.value.search.toLowerCase())) return false
+    if (filters.value.status && i.status !== filters.value.status) return false
+    if (filters.value.assigned_admin_id && String(i.assigned_admin_id) !== String(filters.value.assigned_admin_id)) return false
+    return true
+  })
+})
+
+const archivedItems = computed(() =>
+  filteredItems.value.filter(i =>
+    i.status === 'shipped' && i.date && new Date(i.date.slice(0, 10) + 'T00:00:00') < ONE_YEAR_AGO
+  )
 )
+
+const activeListItems = computed(() => {
+  const archivedIds = new Set(archivedItems.value.map(i => i.id))
+  return filteredItems.value.filter(i => !archivedIds.has(i.id))
+})
 
 const listGroups = computed(() => {
   const grouped = {}
-  filteredItems.value.forEach(item => {
+  activeListItems.value.forEach(item => {
     const key = item.category_id ?? 'none'
     if (!grouped[key]) grouped[key] = { label: item.category?.name ?? '', color: item.category?.color ?? null, items: [] }
     grouped[key].items.push(item)
@@ -460,6 +555,11 @@ const kanbanColumns = computed(() =>
 )
 
 // ── Actions ───────────────────────────────────────────────────────────────────
+
+function setView(v) {
+  view.value = v
+  filterCategory.value = null
+}
 
 function openNew() {
   editingItem.value = null
@@ -484,6 +584,27 @@ function onSaved(item) {
 
 function onDeleted(id) {
   items.value = items.value.filter(i => i.id !== id)
+}
+
+async function moveItem(item, dir) {
+  const grouped = {}
+  items.value.forEach(i => {
+    const key = i.category_id ?? 'none'
+    if (!grouped[key]) grouped[key] = []
+    grouped[key].push(i)
+  })
+  const key = item.category_id ?? 'none'
+  const group = grouped[key]
+  const idx = group.findIndex(i => i.id === item.id)
+  const targetIdx = idx + dir
+  if (targetIdx < 0 || targetIdx >= group.length) return
+  ;[group[idx], group[targetIdx]] = [group[targetIdx], group[idx]]
+  const flat = Object.values(grouped).flat()
+  const withOrders = flat.map((it, i) => ({ ...it, sort_order: i }))
+  items.value = withOrders
+  await useAxios.put('/api/admin/roadmap-order', {
+    items: withOrders.map(i => ({ id: i.id, sort_order: i.sort_order })),
+  })
 }
 
 async function load() {

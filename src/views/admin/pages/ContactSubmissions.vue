@@ -85,8 +85,10 @@ async function markRead(s) {
 
 async function remove(s) {
   if (!confirm('Delete this submission?')) return
-  await useAxios.delete(`/api/admin/contact/${s.id}`)
-  submissions.value = submissions.value.filter(x => x.id !== s.id)
+  const res = await useAxios.delete(`/api/admin/contact/${s.id}`)
+  if (res?.status === 200 || res?.status === 204) {
+    submissions.value = submissions.value.filter(x => x.id !== s.id)
+  }
 }
 
 function formatDate(iso) {

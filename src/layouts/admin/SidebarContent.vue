@@ -48,6 +48,18 @@
     <!-- Bottom actions -->
     <div class="border-t border-gray-700/50 p-3 space-y-1">
       <DarkModeToggle :collapsed="collapsed" />
+      <router-link
+        :to="{ name: 'AdminProfile' }"
+        class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+        :class="[
+          isActive('AdminProfile') ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white',
+          collapsed ? 'justify-center' : ''
+        ]"
+        :title="collapsed ? 'Profile' : undefined"
+      >
+        <UserCircleIcon class="w-5 h-5 flex-shrink-0" />
+        <span v-if="!collapsed">Profile</span>
+      </router-link>
       <button
         @click="logout"
         class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-400 hover:bg-gray-800 hover:text-white transition-colors w-full"
@@ -68,7 +80,7 @@ import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/admin/auth'
 import { useModulesStore } from '@/store/admin/modules'
 import { useAxios } from '@/composables/request'
-import { HomeIcon, UsersIcon, UserGroupIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, NewspaperIcon, TagIcon, DocumentTextIcon, GlobeAltIcon, EnvelopeIcon, CheckCircleIcon, MapIcon, CalendarDaysIcon } from '@heroicons/vue/24/outline'
+import { HomeIcon, UsersIcon, UserGroupIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon, NewspaperIcon, TagIcon, DocumentTextIcon, GlobeAltIcon, EnvelopeIcon, CheckCircleIcon, MapIcon, CalendarDaysIcon, UserCircleIcon } from '@heroicons/vue/24/outline'
 import DarkModeToggle from '@/components/buttons/DarkModeToggle.vue'
 
 defineProps({

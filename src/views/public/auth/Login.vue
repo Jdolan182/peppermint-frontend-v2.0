@@ -50,7 +50,7 @@ const login = async ({ params, form }) => {
           Welcome back
         </h1>
         <p class="mt-4 text-emerald-100 text-lg leading-relaxed">
-          Sign in to access your account and pick up where you left off.
+          Sign in to access your account and see your tasks.
         </p>
       </div>
     </div>
@@ -66,7 +66,13 @@ const login = async ({ params, form }) => {
           <span class="text-xl font-bold text-gray-900">{{ adminName }}</span>
         </div>
 
-        <SignInForm :title="`Sign in to ${adminName}`" :register="true" register-route="/register" @login="login" />
+        <SignInForm :title="`Sign in to ${adminName}`" @login="login" />
+
+        <div class="mt-6 rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 text-sm text-gray-600">
+          <p class="font-medium text-gray-700 mb-1">Try the demo</p>
+          <p>Email: <span class="font-mono text-gray-900">demo@example.com</span></p>
+          <p>Password: <span class="font-mono text-gray-900">password</span></p>
+        </div>
       </div>
     </div>
   </div>

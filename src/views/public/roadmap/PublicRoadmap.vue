@@ -40,7 +40,9 @@
         </div>
       </div>
 
-      <div v-if="loading" class="text-sm text-gray-400">Loading…</div>
+      <div v-if="loading" class="space-y-3">
+        <div v-for="i in 5" :key="i" class="h-16 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+      </div>
 
       <!-- ─── TIMELINE VIEW ───────────────────────────────────────────── -->
       <div v-else-if="view === 'timeline'">
@@ -149,7 +151,7 @@
                           v-if="barSegment(item, m).isStart"
                           class="text-xs font-semibold truncate"
                           :style="{ color: statusColor(item.status) }"
-                        >{{ item.start_date ? formatShortDate(item.start_date) : formatShortDate(item.date) }}</span>
+                        >{{ formatShortDate(item.date) }}</span>
                       </div>
                     </div>
                   </td>
@@ -182,9 +184,9 @@
 
       <!-- ─── LIST VIEW ──────────────────────────────────────────────── -->
       <div v-else>
-        <div v-if="!filteredItems.length" class="text-sm text-gray-400">Nothing here yet.</div>
+        <div v-if="!filteredItems.length && !archivedItems.length" class="text-sm text-gray-400">Nothing here yet.</div>
 
-        <div v-else class="space-y-10">
+        <div class="space-y-10">
           <div v-for="group in listGroups" :key="group.label">
             <h2 v-if="group.label" class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400 mb-4">
               <span v-if="group.color" class="w-2.5 h-2.5 rounded-full flex-shrink-0" :style="{ background: group.color }" />
@@ -205,6 +207,36 @@
                 </div>
                 <p v-if="item.description" class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ item.description }}</p>
                 <p v-if="item.date" class="mt-3 text-xs text-gray-400">Target: {{ formatDate(item.date) }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Archived: shipped items older than 1 year -->
+          <div v-if="archivedItems.length">
+            <button
+              @click="archiveOpen = !archiveOpen"
+              class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors mb-4"
+            >
+              <svg class="w-3 h-3 transition-transform" :class="archiveOpen ? 'rotate-90' : ''" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+              Archived ({{ archivedItems.length }})
+            </button>
+            <div v-if="archiveOpen" class="space-y-4 opacity-60">
+              <div
+                v-for="item in archivedItems"
+                :key="item.id"
+                class="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6"
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <h3 class="text-base font-semibold text-gray-500 dark:text-gray-400 line-through">{{ item.title }}</h3>
+                  <span
+                    class="flex-shrink-0 rounded-full px-3 py-0.5 text-xs font-semibold"
+                    :style="{ background: statusColor(item.status) + '22', color: statusColor(item.status) }"
+                  >{{ statusLabel(item.status) }}</span>
+                </div>
+                <p v-if="item.description" class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ item.description }}</p>
+                <p v-if="item.date" class="mt-3 text-xs text-gray-400">Shipped: {{ formatDate(item.date) }}</p>
               </div>
             </div>
           </div>
@@ -345,8 +377,21 @@ function scrollToToday() {
 }
 
 // ── List helpers ──────────────────────────────────────────────────────────────
+const ONE_YEAR_AGO = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())
+const archiveOpen  = ref(false)
+
+const archivedItems = computed(() =>
+  items.value.filter(i =>
+    i.status === 'shipped' && i.date && new Date(i.date.slice(0, 10) + 'T00:00:00') < ONE_YEAR_AGO
+  )
+)
+
+const archivedIds = computed(() => new Set(archivedItems.value.map(i => i.id)))
+
+const activeItems = computed(() => items.value.filter(i => !archivedIds.value.has(i.id)))
+
 const filteredItems = computed(() =>
-  activeTab.value ? items.value.filter(i => i.status === activeTab.value) : items.value
+  activeTab.value ? activeItems.value.filter(i => i.status === activeTab.value) : activeItems.value
 )
 
 const listGroups = computed(() => {

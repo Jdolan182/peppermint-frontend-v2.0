@@ -8,7 +8,7 @@
           :key="i"
           class="opacity-60 hover:opacity-100 transition-opacity"
         >
-          <img v-if="logo.image" :src="logo.image" :alt="logo.name" class="h-8 object-contain" />
+          <img v-if="logo.image" :src="resolveUrl(logo.image)" :alt="logo.name" class="h-8 object-contain" />
           <span v-else class="text-sm font-semibold text-gray-500 dark:text-gray-400">{{ logo.name }}</span>
         </div>
       </div>
@@ -18,4 +18,6 @@
 
 <script setup>
 defineProps({ data: { type: Object, default: () => ({}) } })
+const apiOrigin = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+function resolveUrl(url) { return url?.startsWith('/') ? apiOrigin + url : url }
 </script>

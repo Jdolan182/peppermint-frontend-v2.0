@@ -36,17 +36,25 @@
       </div>
     </div>
 
-    <!-- Stats placeholder -->
-    <div>
+    <!-- Stats -->
+    <div v-if="modulesStore.isEnabled('tasks') || modulesStore.isEnabled('roadmap')">
       <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Overview</h2>
-      <dl class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <dl v-if="statsLoading" class="grid grid-cols-2 gap-4 sm:grid-cols-5">
+        <div v-for="i in 5" :key="i" class="h-24 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+      </dl>
+      <dl v-else class="grid grid-cols-2 gap-4 sm:grid-cols-5">
         <div
           v-for="item in stats"
-          :key="item.name"
+          :key="item.label"
           class="overflow-hidden rounded-xl bg-white dark:bg-gray-800 px-5 py-5 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700"
         >
-          <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">{{ item.name }}</dt>
-          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">{{ item.stat }}</dd>
+          <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">{{ item.label }}</dt>
+          <dd
+            class="mt-1 text-3xl font-semibold tracking-tight"
+            :class="item.label === 'Overdue' && item.value > 0
+              ? 'text-red-500 dark:text-red-400'
+              : 'text-gray-900 dark:text-white'"
+          >{{ item.value }}</dd>
         </div>
       </dl>
     </div>
@@ -145,6 +153,7 @@ const modulesStore = useModulesStore()
 const myTasks = ref([])
 const myTasksLoading = ref(true)
 const stats = ref([])
+const statsLoading = ref(true)
 const selectedTask = ref(null)
 
 function priorityClass(p) {
@@ -162,12 +171,30 @@ function formatDate(d) {
 }
 
 onMounted(async () => {
+  const calls = []
+
   if (modulesStore.isEnabled('tasks')) {
-    const res = await useAxios.get('/api/admin/tasks?mine=1')
-    myTasks.value = (res?.data ?? []).filter(t => !t.status?.is_closed)
-    myTasksLoading.value = false
+    calls.push(
+      useAxios.get('/api/admin/tasks?mine=1').then(res => {
+        myTasks.value = (res?.data ?? []).filter(t => !t.status?.is_closed)
+        myTasksLoading.value = false
+      })
+    )
   } else {
     myTasksLoading.value = false
   }
+
+  if (modulesStore.isEnabled('tasks') || modulesStore.isEnabled('roadmap')) {
+    calls.push(
+      useAxios.get('/api/admin/stats').then(res => {
+        stats.value = res?.data ?? []
+        statsLoading.value = false
+      })
+    )
+  } else {
+    statsLoading.value = false
+  }
+
+  await Promise.all(calls)
 })
 </script>

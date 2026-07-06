@@ -36,7 +36,10 @@
     </div>
 
     <!-- ─── MONTH VIEW ─────────────────────────────────────────────── -->
-    <div v-if="view === 'month'" class="mt-6 rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden">
+    <div v-if="view === 'month'" class="mt-6 rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden relative">
+      <div v-if="calendarLoading" class="absolute inset-0 z-10 bg-white/60 dark:bg-gray-800/60 flex items-center justify-center">
+        <div class="w-6 h-6 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+      </div>
       <!-- Day of week headers -->
       <div class="grid grid-cols-7 border-b border-gray-100 dark:border-gray-700">
         <div v-for="d in DAYS" :key="d" class="py-2.5 text-center text-xs font-semibold text-gray-500 dark:text-gray-400">{{ d }}</div>
@@ -46,11 +49,12 @@
         <div
           v-for="(cell, i) in calendarCells"
           :key="i"
-          class="min-h-[110px] border-b border-r border-gray-100 dark:border-gray-700 p-2"
+          class="min-h-[110px] border-b border-r border-gray-100 dark:border-gray-700 p-2 group/cell cursor-pointer"
           :class="[
             cell.isCurrentMonth ? '' : 'bg-gray-50/60 dark:bg-gray-900/40',
             i % 7 === 6 ? 'border-r-0' : '',
           ]"
+          @click.self="openNewTask(cell.date)"
         >
           <!-- Day number — click to switch to day view -->
           <button
@@ -216,6 +220,17 @@
         </div>
       </div>
     </Teleport>
+
+    <TaskDrawer
+      v-model="taskDrawerOpen"
+      :task="newTaskDraft"
+      :types="taskTypes"
+      :statuses="taskStatuses"
+      :admins="taskAdmins"
+      :consumers="taskConsumers"
+      :roadmap-items="taskRoadmapItems"
+      @saved="onTaskSaved"
+    />
   </div>
 </template>
 
@@ -223,6 +238,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon, CalendarDaysIcon } from '@heroicons/vue/24/outline'
 import { useAxios } from '@/composables/request'
+import TaskDrawer from '@/components/tasks/TaskDrawer.vue'
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const today = new Date()
@@ -237,8 +253,27 @@ const showTasks   = ref(true)
 const showRoadmap = ref(true)
 const selectedEvent = ref(null)
 
-const tasks        = ref([])
-const roadmapItems = ref([])
+const tasks          = ref([])
+const roadmapItems   = ref([])
+const calendarLoading = ref(false)
+
+// ── Task creation ─────────────────────────────────────────────────────────────
+const taskDrawerOpen    = ref(false)
+const newTaskDraft      = ref(null)
+const taskTypes         = ref([])
+const taskStatuses      = ref([])
+const taskAdmins        = ref([])
+const taskConsumers     = ref([])
+const taskRoadmapItems  = ref([])
+
+function openNewTask(date) {
+  newTaskDraft.value = { due_date: dateStr(date) }
+  taskDrawerOpen.value = true
+}
+
+function onTaskSaved(task) {
+  tasks.value.push(task)
+}
 
 // ── Status meta ───────────────────────────────────────────────────────────────
 const ROADMAP_STATUS = {
@@ -353,7 +388,7 @@ function buildRoadmapEvent(r) {
     _date:        formatDate(r.date),
     _assignee:    r.assigned_admin?.name ?? null,
     _consumer:    null,
-    _category:    r.category,
+    _category:    r.category?.name ?? null,
     title:        r.title,
   }
 }
@@ -406,6 +441,7 @@ function openEventModal(event) {
 
 // ── Data loading ──────────────────────────────────────────────────────────────
 async function load() {
+  calendarLoading.value = true
   const year  = currentYear.value
   const month = currentMonth.value
   const from  = new Date(year, month, 1).toISOString().slice(0, 10)
@@ -413,8 +449,23 @@ async function load() {
   const res = await useAxios.get(`/api/admin/calendar?from=${from}&to=${to}`)
   tasks.value        = res?.data?.tasks ?? []
   roadmapItems.value = res?.data?.roadmap_items ?? []
+  calendarLoading.value = false
 }
 
 watch([currentYear, currentMonth], load)
-onMounted(load)
+onMounted(async () => {
+  await load()
+  const [typesRes, statusesRes, adminsRes, consumersRes, roadmapRes] = await Promise.all([
+    useAxios.get('/api/admin/task-types'),
+    useAxios.get('/api/admin/task-statuses'),
+    useAxios.get('/api/admin/users'),
+    useAxios.get('/api/admin/consumers'),
+    useAxios.get('/api/admin/roadmap'),
+  ])
+  taskTypes.value        = typesRes?.data ?? []
+  taskStatuses.value     = statusesRes?.data ?? []
+  taskAdmins.value       = adminsRes?.data?.data ?? adminsRes?.data ?? []
+  taskConsumers.value    = consumersRes?.data?.data ?? consumersRes?.data ?? []
+  taskRoadmapItems.value = roadmapRes?.data ?? []
+})
 </script>

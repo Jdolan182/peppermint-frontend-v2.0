@@ -88,11 +88,10 @@
 
       <!-- Save -->
       <div class="flex items-center justify-end gap-3">
-        <span v-if="saved" class="text-sm text-green-600 dark:text-green-400">Saved</span>
         <button
           class="rounded-lg bg-gray-900 dark:bg-white px-5 py-2 text-sm font-semibold text-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors disabled:opacity-50"
           :disabled="saving"
-          @click="handleSave"
+          @click="handleSave('general')"
         >
           {{ saving ? 'Saving...' : 'Save changes' }}
         </button>
@@ -116,21 +115,21 @@
             <Input v-model="form.blog_description" placeholder="Ideas, updates, and the occasional deep dive." />
           </div>
         </div>
-      </div>
-      <div class="flex items-center justify-end gap-3">
-        <span v-if="saved" class="text-sm text-green-600 dark:text-green-400">Saved</span>
-        <button
-          class="rounded-lg bg-gray-900 dark:bg-white px-5 py-2 text-sm font-semibold text-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors disabled:opacity-50"
-          :disabled="saving"
-          @click="handleSave"
-        >{{ saving ? 'Saving...' : 'Save changes' }}</button>
+        <div class="border-t border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-end gap-3">
+          <button
+            class="rounded-lg bg-gray-900 dark:bg-white px-5 py-2 text-sm font-semibold text-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors disabled:opacity-50"
+            :disabled="saving"
+            @click="handleSave('blog')"
+          >{{ saving ? 'Saving...' : 'Save changes' }}</button>
+        </div>
       </div>
       <BlogCategoriesSettings />
     </div>
 
-    <!-- Task Types -->
-    <div v-else-if="activeTab === 'task-types'" class="mt-8">
+    <!-- Tasks -->
+    <div v-else-if="activeTab === 'tasks'" class="mt-8 space-y-12">
       <TaskTypesSettings />
+      <TaskStatusesSettings />
     </div>
 
     <!-- Roadmap Categories -->
@@ -145,9 +144,13 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
 import { useModulesStore } from '@/store/admin/modules'
 import { usePublicModules } from '@/composables/publicModules'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 import Input from '@/components/inputs/Input.vue'
 import Label from '@/components/labels/Label.vue'
 import TaskTypesSettings from '@/views/admin/tasks/TaskTypesSettings.vue'
+import TaskStatusesSettings from '@/views/admin/tasks/TaskStatusesSettings.vue'
 import BlogCategoriesSettings from '@/views/admin/blogs/CategoriesIndex.vue'
 import RoadmapCategoriesSettings from '@/views/admin/roadmap/RoadmapCategoriesSettings.vue'
 
@@ -159,7 +162,7 @@ const activeTab = ref('general')
 const allTabs = [
   { id: 'general',             label: 'General',             moduleKey: null },
   { id: 'blog',                label: 'Blog',                moduleKey: 'blogs' },
-  { id: 'task-types',          label: 'Task types',          moduleKey: 'tasks' },
+  { id: 'tasks',               label: 'Tasks',               moduleKey: 'tasks' },
   { id: 'roadmap-categories',  label: 'Roadmap categories',  moduleKey: 'roadmap' },
 ]
 
@@ -212,7 +215,6 @@ const form = ref({
 })
 
 const saving = ref(false)
-const saved = ref(false)
 
 onMounted(async () => {
   const res = await useAxios.get('/api/admin/settings')
@@ -237,15 +239,15 @@ onMounted(async () => {
   }
 })
 
-async function handleSave() {
+async function handleSave(tab = 'general') {
   saving.value = true
-  saved.value = false
   const res = await useAxios.put('/api/admin/settings', form.value)
   if (res?.status === 200) {
-    saved.value = true
+    toast.success('Settings saved')
     await modulesStore.fetch()
     invalidatePublicModulesCache()
-    setTimeout(() => (saved.value = false), 3000)
+  } else {
+    toast.error('Failed to save settings')
   }
   saving.value = false
 }

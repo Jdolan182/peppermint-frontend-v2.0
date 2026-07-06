@@ -4,11 +4,9 @@
         <div class="h-full overflow-hidden shadow-sm sm:rounded-lg">
             <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
                 <div class="sm:mx-auto sm:w-full sm:max-w-md">
-                <!-- TODO logo -->
-                    <!-- <img class="mx-auto h-12 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="Your Company" /> -->
                     <HeaderTwo
                     :header=props.title
-                    :stlye=1 
+                    :style=1
                     />
                 </div>
         

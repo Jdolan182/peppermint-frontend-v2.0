@@ -49,6 +49,9 @@ import DataTable from '@/components/tables/DataTable.vue'
 import Pagination from '@/components/tables/Pagination.vue'
 import ConsumerFormModal from '@/components/modals/ConsumerFormModal.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const columns = [
   { key: 'name', label: 'Name' },
@@ -106,11 +109,14 @@ async function handleSubmit(data) {
   }
 
   if (res?.status === 200 || res?.status === 201) {
+    toast.success(editing.value ? 'Consumer updated' : 'Consumer created')
     showForm.value = false
     await fetchPage(currentPage.value)
   } else if (res?.response?.status === 422) {
     const errs = res.response.data?.errors ?? {}
     formErrors.value = Object.fromEntries(Object.entries(errs).map(([k, v]) => [k, v[0]]))
+  } else {
+    toast.error('Failed to save consumer')
   }
   saving.value = false
 }
@@ -119,9 +125,12 @@ async function handleDelete() {
   deletingLoading.value = true
   const res = await useAxios.delete(`/api/admin/consumers/${deleting.value.id}`)
   if (res?.status === 200) {
+    toast.success('Consumer deleted')
     showConfirm.value = false
     deleting.value = null
     await fetchPage(currentPage.value)
+  } else {
+    toast.error('Failed to delete consumer')
   }
   deletingLoading.value = false
 }

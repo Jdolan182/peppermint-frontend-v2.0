@@ -152,10 +152,12 @@ export const PAGE_BLOCKS = [
     label: 'Testimonials',
     defaultData: {
       heading: '',
+      subheading: '',
       items: [],
     },
     fields: [
-      { key: 'heading', label: 'Heading', type: 'text' },
+      { key: 'heading',    label: 'Heading',    type: 'text' },
+      { key: 'subheading', label: 'Subheading', type: 'text' },
       {
         key: 'items', label: 'Testimonials', type: 'items',
         subFields: [

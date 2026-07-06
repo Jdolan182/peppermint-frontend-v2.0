@@ -114,6 +114,9 @@ import { useRouter } from 'vue-router'
 import { useAxios } from '@/composables/request'
 import draggable from 'vuedraggable'
 import { ChevronRightIcon } from '@heroicons/vue/24/outline'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const router = useRouter()
 const pages = ref([])
@@ -140,7 +143,10 @@ async function createPage() {
 
 async function deletePage(page) {
   if (!confirm(`Delete "${page.title}"?`)) return
-  await useAxios.delete(`/api/admin/pages/${page.id}`)
+  const res = await useAxios.delete(`/api/admin/pages/${page.id}`)
+  if (res?.status === 200 || res?.status === 204) {
+    toast.success('Page deleted')
+  }
   await load()
 }
 

@@ -4,6 +4,7 @@ import { RouterView, useRoute } from "vue-router";
 import adminLayout from "./layouts/admin/adminLayout.vue";
 import publicLayout from "./layouts/public/publicLayout.vue";
 import Banner from "@/components/banners/Banner.vue";
+import ToastContainer from "@/components/ui/ToastContainer.vue";
 import { onMounted, onUnmounted } from "vue";
 import { useThemeStore } from "@/store/theme";
 
@@ -38,4 +39,5 @@ onUnmounted(() => {
 
   <!-- Banner always rendered -->
   <Banner class="z-50" />
+  <ToastContainer />
 </template>

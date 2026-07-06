@@ -44,6 +44,9 @@ import { formatDate } from '@/helpers/date'
 import DataTable from '@/components/tables/DataTable.vue'
 import Pagination from '@/components/tables/Pagination.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const columns = [
   { key: 'title', label: 'Title' },
@@ -78,9 +81,12 @@ async function handleDelete() {
   deletingLoading.value = true
   const res = await useAxios.delete(`/api/admin/blogs/${deleting.value.id}`)
   if (res?.status === 200) {
+    toast.success('Post deleted')
     showConfirm.value = false
     deleting.value = null
     await fetchPage(currentPage.value)
+  } else {
+    toast.error('Failed to delete post')
   }
   deletingLoading.value = false
 }

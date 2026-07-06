@@ -108,6 +108,9 @@ import Modal from '@/components/modals/Modal.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import Input from '@/components/inputs/Input.vue'
 import Label from '@/components/labels/Label.vue'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const columns = [
   { key: 'name', label: 'Name' },
@@ -184,11 +187,14 @@ async function handleSubmit() {
   }
 
   if (res?.status === 200 || res?.status === 201) {
+    toast.success(editing.value ? 'Category updated' : 'Category created')
     showForm.value = false
     await fetchPage(currentPage.value)
   } else if (res?.response?.status === 422) {
     const errs = res.response.data?.errors ?? {}
     formErrors.value = Object.fromEntries(Object.entries(errs).map(([k, v]) => [k, v[0]]))
+  } else {
+    toast.error('Failed to save category')
   }
   saving.value = false
 }
@@ -197,9 +203,12 @@ async function handleDelete() {
   deletingLoading.value = true
   const res = await useAxios.delete(`/api/admin/categories/${deleting.value.id}`)
   if (res?.status === 200) {
+    toast.success('Category deleted')
     showConfirm.value = false
     deleting.value = null
     await fetchPage(currentPage.value)
+  } else {
+    toast.error('Failed to delete category')
   }
   deletingLoading.value = false
 }

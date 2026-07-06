@@ -9,7 +9,6 @@
           <p class="text-sm text-gray-400">/{{ page.slug }}</p>
         </div>
         <div class="flex items-center gap-2">
-          <span v-if="saved" class="text-sm text-green-600 dark:text-green-400">Saved</span>
           <button
             @click="openPreview"
             class="rounded-lg border border-gray-200 dark:border-gray-600 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -194,6 +193,9 @@ import BlockEditor from '@/components/pages/BlockEditor.vue'
 import Toggle from '@/components/inputs/Toggle.vue'
 import draggable from 'vuedraggable'
 import { ChevronRightIcon } from '@heroicons/vue/24/outline'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -203,7 +205,6 @@ const sections = ref([])
 const allPages = ref([])
 const loading = ref(true)
 const savingMeta = ref(false)
-const saved = ref(false)
 const collapsed = ref({})
 
 function toggleCollapse(id) {
@@ -258,8 +259,9 @@ async function saveMeta() {
   const res = await useAxios.put(`/api/admin/pages/${page.value.id}`, meta)
   if (res?.data) {
     page.value = { ...page.value, ...res.data }
-    saved.value = true
-    setTimeout(() => (saved.value = false), 2000)
+    toast.success('Page settings saved')
+  } else {
+    toast.error('Failed to save settings')
   }
   savingMeta.value = false
 }
@@ -273,6 +275,7 @@ async function setHome() {
   await useAxios.post(`/api/admin/pages/${page.value.id}/home`)
   page.value.is_home = true
   meta.is_home = true
+  toast.success('Set as home page')
 }
 
 async function addSection(block) {

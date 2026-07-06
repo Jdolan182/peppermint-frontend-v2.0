@@ -19,12 +19,12 @@
     <div class="flex-1" />
 
     <!-- User info -->
-    <div class="flex items-center gap-3">
+    <router-link :to="{ name: 'AdminProfile' }" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
       <span class="text-sm text-gray-500 dark:text-gray-400">{{ userStore.getName }}</span>
       <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
         <span class="text-white text-xs font-semibold">{{ initials }}</span>
       </div>
-    </div>
+    </router-link>
   </header>
 </template>
 

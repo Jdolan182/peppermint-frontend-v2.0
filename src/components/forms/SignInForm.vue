@@ -41,12 +41,12 @@
       </div>
     </Form>
 
-    <p v-if="register" class="mt-6 text-center text-sm text-gray-500">
+    <!-- <p v-if="register" class="mt-6 text-center text-sm text-gray-500">
       Don't have an account?
       <router-link :to="registerRoute" class="font-medium text-indigo-600 hover:text-indigo-500">
         Sign up
       </router-link>
-    </p>
+    </p> -->
   </div>
 </template>
 

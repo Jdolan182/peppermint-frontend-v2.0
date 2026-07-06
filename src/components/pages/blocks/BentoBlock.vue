@@ -12,7 +12,7 @@
             'row-span-2': item.size === 'tall',
           }"
         >
-          <img v-if="item.image" :src="item.image" alt="" class="w-full object-cover" :class="item.size === 'tall' ? 'h-64' : 'h-40'" />
+          <img v-if="item.image" :src="resolveUrl(item.image)" alt="" class="w-full object-cover" :class="item.size === 'tall' ? 'h-64' : 'h-40'" />
           <div class="p-5 flex-1">
             <h3 class="font-semibold text-gray-900 dark:text-white">{{ item.title }}</h3>
             <p v-if="item.description" class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ item.description }}</p>
@@ -25,4 +25,6 @@
 
 <script setup>
 defineProps({ data: { type: Object, default: () => ({}) } })
+const apiOrigin = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+function resolveUrl(url) { return url?.startsWith('/') ? apiOrigin + url : url }
 </script>

@@ -23,9 +23,6 @@ export const useUserStore = defineStore('user', {
         const authStore = useAuthStore();
         authStore.setLoggedIn(true)
         this.getUser();
-        //TODO - in the future they would go here?
-        // set user role
-        // set user permissions
     },
     async getUser() {
         const res = await useAxios.get('api/admin/user')

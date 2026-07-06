@@ -3,11 +3,41 @@
     <div class="mx-auto max-w-2xl px-4 py-12 sm:px-6">
 
       <!-- Header -->
-      <div class="mb-8">
+      <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">My Tasks</h1>
         <p v-if="!loading && tasks.length" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
           {{ openTasks.length }} open · {{ closedTasks.length }} completed
         </p>
+      </div>
+
+      <!-- Search + filter -->
+      <div v-if="!loading && tasks.length" class="mb-6 flex items-center gap-3">
+        <div class="relative flex-1">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 111 11a6 6 0 0116 0z" /></svg>
+          <input
+            v-model="query"
+            type="text"
+            placeholder="Search tasks…"
+            class="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div class="flex rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden text-xs font-medium">
+          <button
+            @click="statusFilter = 'open'"
+            class="px-3 py-2 transition-colors"
+            :class="statusFilter === 'open' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'"
+          >Open</button>
+          <button
+            @click="statusFilter = 'all'"
+            class="px-3 py-2 transition-colors border-x border-gray-200 dark:border-gray-700"
+            :class="statusFilter === 'all' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'"
+          >All</button>
+          <button
+            @click="statusFilter = 'closed'"
+            class="px-3 py-2 transition-colors"
+            :class="statusFilter === 'closed' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'"
+          >Done</button>
+        </div>
       </div>
 
       <div v-if="loading" class="space-y-3">
@@ -19,6 +49,9 @@
           <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
         </div>
         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">No tasks assigned to you yet.</p>
+      </div>
+      <div v-else-if="!filteredTasks.length" class="rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 px-6 py-10 text-center">
+        <p class="text-sm text-gray-400">No tasks match your search.</p>
       </div>
 
       <div v-else class="space-y-8">
@@ -128,10 +161,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
 
-const tasks   = ref([])
-const loading = ref(true)
-const expanded = ref(new Set())
-const showClosed = ref(false)
+const tasks        = ref([])
+const loading      = ref(true)
+const expanded     = ref(new Set())
+const showClosed   = ref(false)
+const query        = ref('')
+const statusFilter = ref('open')
 
 function toggle(id) {
   const s = new Set(expanded.value)
@@ -140,8 +175,18 @@ function toggle(id) {
   expanded.value = s
 }
 
-const openTasks   = computed(() => tasks.value.filter(t => !t.status?.is_closed))
-const closedTasks = computed(() => tasks.value.filter(t => t.status?.is_closed))
+const filteredTasks = computed(() => {
+  const q = query.value.toLowerCase().trim()
+  return tasks.value.filter(t => {
+    if (q && !t.title.toLowerCase().includes(q)) return false
+    if (statusFilter.value === 'open')   return !t.status?.is_closed
+    if (statusFilter.value === 'closed') return t.status?.is_closed
+    return true
+  })
+})
+
+const openTasks   = computed(() => filteredTasks.value.filter(t => !t.status?.is_closed))
+const closedTasks = computed(() => filteredTasks.value.filter(t => t.status?.is_closed))
 
 function formatDate(d) {
   if (!d) return ''

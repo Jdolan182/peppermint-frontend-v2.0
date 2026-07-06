@@ -9,7 +9,7 @@
         <div v-for="(member, i) in (data.members ?? [])" :key="i" class="text-center">
           <img
             v-if="member.image"
-            :src="member.image"
+            :src="resolveUrl(member.image)"
             :alt="member.name"
             class="w-24 h-24 rounded-full object-cover mx-auto mb-4"
           />
@@ -30,4 +30,10 @@
 
 <script setup>
 defineProps({ data: { type: Object, default: () => ({}) } })
+
+const apiOrigin = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+function resolveUrl(url) {
+  if (!url) return url
+  return url.startsWith('/') ? apiOrigin + url : url
+}
 </script>

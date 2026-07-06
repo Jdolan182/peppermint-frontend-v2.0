@@ -1,7 +1,10 @@
 <template>
   <section class="py-20 px-6 bg-gray-50 dark:bg-gray-800/50">
     <div class="max-w-5xl mx-auto">
-      <h2 v-if="data.heading" class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">{{ data.heading }}</h2>
+      <div v-if="data.heading || data.subheading" class="text-center mb-12">
+        <h2 v-if="data.heading" class="text-3xl font-bold text-gray-900 dark:text-white">{{ data.heading }}</h2>
+        <p v-if="data.subheading" class="mt-3 text-base text-gray-500 dark:text-gray-400">{{ data.subheading }}</p>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           v-for="(item, i) in (data.items ?? [])"
@@ -12,7 +15,7 @@
           <div class="flex items-center gap-3">
             <img
               v-if="item.image"
-              :src="item.image"
+              :src="resolveUrl(item.image)"
               :alt="item.author"
               class="w-10 h-10 rounded-full object-cover flex-shrink-0"
             />
@@ -32,4 +35,6 @@
 
 <script setup>
 defineProps({ data: { type: Object, default: () => ({}) } })
+const apiOrigin = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+function resolveUrl(url) { return url?.startsWith('/') ? apiOrigin + url : url }
 </script>

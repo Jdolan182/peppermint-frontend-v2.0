@@ -19,7 +19,7 @@
         </div>
       </div>
       <div v-if="data.image" class="flex-shrink-0 w-full md:w-96">
-        <img :src="data.image" alt="" class="rounded-2xl w-full object-cover shadow-lg" />
+        <img :src="resolveUrl(data.image)" alt="" class="rounded-2xl w-full object-cover shadow-lg" />
       </div>
     </div>
   </section>
@@ -28,4 +28,6 @@
 <script setup>
 import SmartLink from '@/components/pages/SmartLink.vue'
 defineProps({ data: { type: Object, default: () => ({}) } })
+const apiOrigin = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+function resolveUrl(url) { return url?.startsWith('/') ? apiOrigin + url : url }
 </script>

@@ -18,11 +18,19 @@
           <span v-if="status.is_closed" class="text-xs bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400 rounded-full px-2 py-0.5">Closed</span>
         </div>
         <div class="flex gap-2">
-          <button @click="openEdit(status)" class="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>
+          <button @click="openEdit(status)" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium">Edit</button>
           <button @click="handleDelete(status)" class="text-xs text-red-500 hover:text-red-600 transition-colors px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">Delete</button>
         </div>
       </div>
     </div>
+
+    <ConfirmModal
+      v-model="confirmOpen"
+      title="Delete status"
+      :message="confirmPending ? `Delete status '${confirmPending.name}'? This cannot be undone.` : ''"
+      :loading="deleting"
+      @confirm="doDelete"
+    />
 
     <!-- Modal -->
     <Teleport to="body">
@@ -66,12 +74,20 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const statuses = ref([])
 const modalOpen = ref(false)
 const saving = ref(false)
 const editingId = ref(null)
 const isNew = computed(() => !editingId.value)
+
+const confirmOpen = ref(false)
+const confirmPending = ref(null)
+const deleting = ref(false)
 
 const form = ref({ name: '', color: '#6b7280', is_default: false, is_closed: false })
 
@@ -94,16 +110,26 @@ async function handleSave() {
     : await useAxios.put(`/api/admin/task-statuses/${editingId.value}`, form.value)
   saving.value = false
   if (res?.data) {
+    toast.success(isNew.value ? 'Status created' : 'Status updated')
     modalOpen.value = false
     await load()
+  } else {
+    toast.error('Failed to save status')
   }
 }
 
-async function handleDelete(status) {
-  if (!confirm(`Delete status "${status.name}"?`)) return
-  const res = await useAxios.delete(`/api/admin/task-statuses/${status.id}`)
-  if (res?.status === 200) await load()
-  else if (res?.data?.message) alert(res.data.message)
+function handleDelete(status) {
+  confirmPending.value = status
+  confirmOpen.value = true
+}
+
+async function doDelete() {
+  deleting.value = true
+  const res = await useAxios.delete(`/api/admin/task-statuses/${confirmPending.value.id}`)
+  deleting.value = false
+  confirmOpen.value = false
+  if (res?.status === 200) { toast.success('Status deleted'); await load() }
+  else toast.error('Failed to delete status')
 }
 
 async function load() {

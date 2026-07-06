@@ -17,7 +17,7 @@
       <DataTable :columns="columns" :rows="users" empty-message="No admin users yet.">
         <template #actions="{ row }">
           <button class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium mr-4" @click="openEdit(row)">Edit</button>
-          <button class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium" @click="openDelete(row)">Delete</button>
+          <button v-if="String(row.id) !== String(userStore.userId)" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium" @click="openDelete(row)">Delete</button>
         </template>
       </DataTable>
       <Pagination :meta="meta" class="mt-3" @change="fetchPage" />
@@ -44,6 +44,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
+import { useUserStore } from '@/store/admin/user'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
+
+const userStore = useUserStore()
 import { formatDateTime } from '@/helpers/date'
 import DataTable from '@/components/tables/DataTable.vue'
 import Pagination from '@/components/tables/Pagination.vue'
@@ -106,6 +112,7 @@ async function handleSubmit(data) {
   }
 
   if (res?.status === 200 || res?.status === 201) {
+    toast.success(editing.value ? 'User updated' : 'User created')
     showForm.value = false
     await fetchPage(currentPage.value)
   } else if (res?.response?.status === 422) {
@@ -119,9 +126,12 @@ async function handleDelete() {
   deletingLoading.value = true
   const res = await useAxios.delete(`/api/admin/users/${deleting.value.id}`)
   if (res?.status === 200) {
+    toast.success('User deleted')
     showConfirm.value = false
     deleting.value = null
     await fetchPage(currentPage.value)
+  } else {
+    toast.error(res?.response?.data?.message ?? 'Failed to delete user')
   }
   deletingLoading.value = false
 }

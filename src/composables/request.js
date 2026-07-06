@@ -70,14 +70,11 @@ const useAxios = {
         ) => {
           try {
             return  await axios.post(
-              url, 
-              data, 
+              url,
+              data,
               config
             );
           } catch (error) {
-            if (form) {
-                displayFormErrors(form, error);
-            }
             useAxios.processError(error)
             return error
           }

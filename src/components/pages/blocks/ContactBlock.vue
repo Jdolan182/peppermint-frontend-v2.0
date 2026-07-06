@@ -58,18 +58,17 @@ const form = reactive({ name: '', email: '', message: '' })
 async function submit() {
   error.value = null
   loading.value = true
-  try {
-    await useAxios.post('/api/public/contact', {
-      name: form.name,
-      email: form.email,
-      message: form.message,
-      page_slug: route.params.slug ?? null,
-    })
+  const res = await useAxios.post('/api/public/contact', {
+    name: form.name,
+    email: form.email,
+    message: form.message,
+    page_slug: route.params.slug ?? null,
+  })
+  if (res?.status === 200 || res?.status === 201) {
     submitted.value = true
-  } catch (e) {
-    error.value = e?.response?.data?.message ?? 'Something went wrong. Please try again.'
-  } finally {
-    loading.value = false
+  } else {
+    error.value = res?.response?.data?.message ?? 'Something went wrong. Please try again.'
   }
+  loading.value = false
 }
 </script>

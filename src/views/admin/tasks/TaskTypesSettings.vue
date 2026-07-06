@@ -17,11 +17,19 @@
           <span v-if="type.is_appointment" class="text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full px-2 py-0.5">Appointment</span>
         </div>
         <div class="flex gap-2">
-          <button @click="openEdit(type)" class="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>
+          <button @click="openEdit(type)" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium">Edit</button>
           <button @click="handleDelete(type)" class="text-xs text-red-500 hover:text-red-600 transition-colors px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">Delete</button>
         </div>
       </div>
     </div>
+
+    <ConfirmModal
+      v-model="confirmOpen"
+      title="Delete type"
+      :message="confirmPending ? `Delete type '${confirmPending.name}'? This cannot be undone.` : ''"
+      :loading="deleting"
+      @confirm="doDelete"
+    />
 
     <!-- Modal -->
     <Teleport to="body">
@@ -59,12 +67,20 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const types = ref([])
 const modalOpen = ref(false)
 const saving = ref(false)
 const editingId = ref(null)
 const isNew = computed(() => !editingId.value)
+
+const confirmOpen = ref(false)
+const confirmPending = ref(null)
+const deleting = ref(false)
 
 const form = ref({ name: '', color: '#6366f1', is_appointment: false })
 
@@ -87,16 +103,26 @@ async function handleSave() {
     : await useAxios.put(`/api/admin/task-types/${editingId.value}`, form.value)
   saving.value = false
   if (res?.data) {
+    toast.success(isNew.value ? 'Type created' : 'Type updated')
     modalOpen.value = false
     await load()
+  } else {
+    toast.error('Failed to save type')
   }
 }
 
-async function handleDelete(type) {
-  if (!confirm(`Delete type "${type.name}"?`)) return
-  const res = await useAxios.delete(`/api/admin/task-types/${type.id}`)
-  if (res?.status === 200) await load()
-  else if (res?.data?.message) alert(res.data.message)
+function handleDelete(type) {
+  confirmPending.value = type
+  confirmOpen.value = true
+}
+
+async function doDelete() {
+  deleting.value = true
+  const res = await useAxios.delete(`/api/admin/task-types/${confirmPending.value.id}`)
+  deleting.value = false
+  confirmOpen.value = false
+  if (res?.status === 200) { toast.success('Type deleted'); await load() }
+  else toast.error('Failed to delete type')
 }
 
 async function load() {

@@ -87,10 +87,7 @@
           <!-- Roadmap item -->
           <div>
             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Linked roadmap item</label>
-            <select v-model="form.roadmap_item_id" class="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option :value="null">None</option>
-              <option v-for="r in roadmapItems" :key="r.id" :value="r.id">{{ r.title }}</option>
-            </select>
+            <SearchSelect v-model="form.roadmap_item_id" :options="roadmapOptions" null-label="None" />
           </div>
 
           <!-- Description -->
@@ -139,6 +136,14 @@
       </div>
     </div>
   </Teleport>
+
+  <ConfirmModal
+    v-model="confirmOpen"
+    title="Delete task"
+    :message="props.task ? `Delete '${props.task.title}'? This cannot be undone.` : ''"
+    :loading="deleting"
+    @confirm="doDelete"
+  />
 </template>
 
 <script setup>
@@ -146,6 +151,10 @@ import { ref, watch, computed } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAxios } from '@/composables/request'
 import SearchSelect from '@/components/ui/SearchSelect.vue'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const props = defineProps({
   modelValue: Boolean,
@@ -161,6 +170,10 @@ const emit = defineEmits(['update:modelValue', 'saved', 'deleted'])
 
 const saving = ref(false)
 const isNew = computed(() => !props.task?.id)
+const roadmapOptions = computed(() => props.roadmapItems.map(r => ({ id: r.id, name: r.title })))
+
+const confirmOpen = ref(false)
+const deleting = ref(false)
 
 const defaultForm = () => ({
   title: '',
@@ -206,15 +219,29 @@ async function handleSave() {
     : await useAxios.put(`/api/admin/tasks/${props.task.id}`, payload)
   saving.value = false
   if (res?.data) {
+    toast.success(isNew.value ? 'Task created' : 'Task updated')
     emit('saved', res.data)
     emit('update:modelValue', false)
+  } else {
+    toast.error('Failed to save task')
   }
 }
 
-async function handleDelete() {
-  if (!confirm('Delete this task?')) return
-  await useAxios.delete(`/api/admin/tasks/${props.task.id}`)
-  emit('deleted', props.task.id)
-  emit('update:modelValue', false)
+function handleDelete() {
+  confirmOpen.value = true
+}
+
+async function doDelete() {
+  deleting.value = true
+  const res = await useAxios.delete(`/api/admin/tasks/${props.task.id}`)
+  deleting.value = false
+  confirmOpen.value = false
+  if (res?.status === 200 || res?.status === 204) {
+    toast.success('Task deleted')
+    emit('deleted', props.task.id)
+    emit('update:modelValue', false)
+  } else {
+    toast.error('Failed to delete task')
+  }
 }
 </script>

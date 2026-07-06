@@ -16,7 +16,7 @@
           <span class="text-sm font-medium text-gray-900 dark:text-white">{{ cat.name }}</span>
         </div>
         <div class="flex gap-2">
-          <button @click="openEdit(cat)" class="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Edit</button>
+          <button @click="openEdit(cat)" class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium">Edit</button>
           <button @click="handleDelete(cat)" class="text-xs text-red-500 hover:text-red-600 transition-colors px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">Delete</button>
         </div>
       </div>
@@ -54,6 +54,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const categories = ref([])
 const modalOpen  = ref(false)
@@ -82,16 +85,23 @@ async function handleSave() {
     : await useAxios.put(`/api/admin/roadmap-categories/${editingId.value}`, form.value)
   saving.value = false
   if (res?.data) {
+    toast.success(isNew.value ? 'Category created' : 'Category updated')
     modalOpen.value = false
     await load()
+  } else {
+    toast.error('Failed to save category')
   }
 }
 
 async function handleDelete(cat) {
   if (!confirm(`Delete category "${cat.name}"?`)) return
   const res = await useAxios.delete(`/api/admin/roadmap-categories/${cat.id}`)
-  if (res?.status === 204 || res?.status === 200) await load()
-  else if (res?.response?.data?.message) alert(res.response.data.message)
+  if (res?.status === 204 || res?.status === 200) {
+    toast.success('Category deleted')
+    await load()
+  } else {
+    toast.error(res?.response?.data?.message ?? 'Failed to delete category')
+  }
 }
 
 async function load() {

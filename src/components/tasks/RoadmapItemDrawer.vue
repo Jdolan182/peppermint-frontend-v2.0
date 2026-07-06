@@ -136,6 +136,9 @@ import { ref, watch, computed } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAxios } from '@/composables/request'
 import SearchSelect from '@/components/ui/SearchSelect.vue'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const props = defineProps({
   modelValue: Boolean,
@@ -188,14 +191,20 @@ async function handleSave() {
     : await useAxios.put(`/api/admin/roadmap/${props.item.id}`, payload)
   saving.value = false
   if (res?.data) {
+    toast.success(isNew.value ? 'Item created' : 'Item updated')
     emit('saved', res.data)
     emit('update:modelValue', false)
+  } else {
+    toast.error('Failed to save item')
   }
 }
 
 async function handleDelete() {
   if (!confirm('Delete this roadmap item? Linked tasks will be unlinked.')) return
-  await useAxios.delete(`/api/admin/roadmap/${props.item.id}`)
+  const res = await useAxios.delete(`/api/admin/roadmap/${props.item.id}`)
+  if (res?.status === 200 || res?.status === 204) {
+    toast.success('Item deleted')
+  }
   emit('deleted', props.item.id)
   emit('update:modelValue', false)
 }

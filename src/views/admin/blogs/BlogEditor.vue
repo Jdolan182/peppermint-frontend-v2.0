@@ -96,6 +96,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAxios } from '@/composables/request'
 import WysiwygEditor from '@/components/editor/WysiwygEditor.vue'
 import Label from '@/components/labels/Label.vue'
+import { useToast } from '@/composables/useToast'
+
+const toast = useToast()
 
 const route = useRoute()
 const router = useRouter()
@@ -150,10 +153,14 @@ async function save(publish) {
   }
 
   if (res?.status === 200 || res?.status === 201) {
+    toast.success(isEdit.value ? 'Post updated' : 'Post published')
     router.push({ name: 'Blogs' })
   } else if (res?.response?.status === 422) {
     const errs = res.response.data?.errors ?? {}
     errors.value = Object.fromEntries(Object.entries(errs).map(([k, v]) => [k, v[0]]))
+    toast.error('Please fix the highlighted errors')
+  } else {
+    toast.error('Failed to save post')
   }
 
   saving.value = false

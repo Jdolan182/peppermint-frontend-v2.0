@@ -65,7 +65,10 @@
               :to="{ name: 'ConsumerTasks' }"
               class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
             >My Tasks</router-link>
-            <span class="text-sm text-gray-500">{{ userStore.getName }}</span>
+            <router-link
+              :to="{ name: 'ConsumerProfile' }"
+              class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            >Profile</router-link>
             <button
               @click="consumerAuth.logout()"
               class="rounded-lg px-4 py-2 text-sm font-semibold text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50 transition-colors"
@@ -73,7 +76,6 @@
           </template>
           <template v-else-if="publicLoginEnabled">
             <router-link :to="{ name: 'ConsumerLogin' }" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Sign in</router-link>
-            <router-link :to="{ name: 'ConsumerLogin' }" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors">Get started</router-link>
           </template>
         </div>
       </nav>

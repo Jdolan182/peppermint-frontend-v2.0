@@ -14,6 +14,10 @@
           <Label :label="consumer ? 'Password (leave blank to keep current)' : 'Password'" />
           <Input v-model="form.password" type="password" :error="!!errors.password" :error-message="errors.password" />
         </div>
+        <div v-if="form.password">
+          <Label label="Confirm password" />
+          <Input v-model="form.password_confirmation" type="password" :error="!!errors.password_confirmation" :error-message="errors.password_confirmation" />
+        </div>
       </div>
       <div class="flex justify-end gap-3 mt-6">
         <button
@@ -50,7 +54,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'submit'])
 
-const form = ref({ name: '', email: '', password: '' })
+const form = ref({ name: '', email: '', password: '', password_confirmation: '' })
 
 watch(() => props.modelValue, (open) => {
   if (open) {
@@ -58,6 +62,7 @@ watch(() => props.modelValue, (open) => {
       name: props.consumer?.name ?? '',
       email: props.consumer?.email ?? '',
       password: '',
+      password_confirmation: '',
     }
   }
 })
