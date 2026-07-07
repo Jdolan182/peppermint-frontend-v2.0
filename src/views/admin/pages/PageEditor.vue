@@ -5,8 +5,8 @@
     <div class="flex-1 min-w-0 space-y-4">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">{{ page.title }}</h1>
-          <p class="text-sm text-gray-400">/{{ page.slug }}</p>
+          <h1 class="text-xl font-semibold text-gray-900 dark:text-white">{{ meta.title }}</h1>
+          <p class="text-sm text-gray-400">/{{ meta.slug }}</p>
         </div>
         <div class="flex items-center gap-2">
           <button
@@ -250,7 +250,7 @@ async function load() {
       meta_description: pageRes.data.meta_description ?? '',
     })
   }
-  allPages.value = allRes?.data ?? []
+  allPages.value = allRes?.data?.pages ?? []
   loading.value = false
 }
 
@@ -259,6 +259,18 @@ async function saveMeta() {
   const res = await useAxios.put(`/api/admin/pages/${page.value.id}`, meta)
   if (res?.data) {
     page.value = { ...page.value, ...res.data }
+    Object.assign(meta, {
+      title:            res.data.title,
+      slug:             res.data.slug,
+      nav_label:        res.data.nav_label ?? '',
+      parent_id:        res.data.parent_id ?? null,
+      show_in_nav:      res.data.show_in_nav,
+      show_footer:      res.data.show_footer,
+      is_published:     res.data.is_published,
+      is_home:          res.data.is_home,
+      meta_title:       res.data.meta_title ?? '',
+      meta_description: res.data.meta_description ?? '',
+    })
     toast.success('Page settings saved')
   } else {
     toast.error('Failed to save settings')

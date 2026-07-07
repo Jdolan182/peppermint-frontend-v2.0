@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/admin/auth'
 import { useConsumerAuthStore } from '@/store/consumer/auth'
 import { useModulesStore } from '@/store/admin/modules'
 import { usePublicModules } from '@/composables/publicModules'
+import { config } from '@/config'
 
 const routes = [
   ...getAdminRoutes(),
@@ -23,12 +24,8 @@ const router = createRouter({
 })
 
 function checkMaintenanceBypass(to) {
-  const pwd = import.meta.env.VITE_MAINTENANCE_PASSWORD
-  if (!pwd) return false
-  if (to.query.bypass === pwd) {
-    localStorage.setItem('maintenance_bypass', pwd)
-  }
-  return localStorage.getItem('maintenance_bypass') === pwd
+  if (!config.maintenance.bypass) return false
+  return !!localStorage.getItem('pm_bypass_token')
 }
 
 router.beforeEach(async (to) => {
@@ -37,7 +34,7 @@ router.beforeEach(async (to) => {
 
   // --- Maintenance page: redirect away if maintenance is not active ---
   if (to.name === 'Maintenance') {
-    if (import.meta.env.VITE_MAINTENANCE_MODE === 'true' && !checkMaintenanceBypass(to)) return
+    if (config.maintenance.enabled && !checkMaintenanceBypass(to)) return
     const { fetchPublicModules, maintenance } = usePublicModules()
     await fetchPublicModules()
     if (!maintenance.value) return { name: 'Home' }
@@ -45,7 +42,7 @@ router.beforeEach(async (to) => {
   }
 
   // --- Env-based global maintenance: blocks everything including admin ---
-  if (import.meta.env.VITE_MAINTENANCE_MODE === 'true' && !checkMaintenanceBypass(to)) {
+  if (config.maintenance.enabled && !checkMaintenanceBypass(to)) {
     return { name: 'Maintenance' }
   }
 

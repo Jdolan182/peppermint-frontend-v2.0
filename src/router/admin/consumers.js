@@ -1,8 +1,9 @@
 import { UsersIcon } from '@heroicons/vue/24/outline'
+import { config } from '@/config'
 
 export const ConsumerRoutes = [
   {
-    path: '/' + import.meta.env.VITE_MODULE_ADMIN_NAME.toLowerCase() + '/consumers',
+    path: '/' + config.admin.slug + '/consumers',
     meta: {
       requiresAuth: true,
       layout: 'admin',

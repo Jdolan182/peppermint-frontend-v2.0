@@ -10,7 +10,7 @@
 
     <div class="mt-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
       <div v-if="!types.length" class="px-6 py-10 text-center text-sm text-gray-400">No types yet.</div>
-      <div v-for="type in types" :key="type.id" class="flex items-center justify-between px-5 py-4">
+      <div v-for="type in pagedTypes" :key="type.id" class="flex items-center justify-between px-5 py-4">
         <div class="flex items-center gap-3">
           <span class="w-3.5 h-3.5 rounded-full flex-shrink-0" :style="{ background: type.color }" />
           <span class="text-sm font-medium text-gray-900 dark:text-white">{{ type.name }}</span>
@@ -22,6 +22,8 @@
         </div>
       </div>
     </div>
+
+    <Pagination :meta="typesMeta" class="mt-3" @change="typesPage = $event" />
 
     <ConfirmModal
       v-model="confirmOpen"
@@ -68,11 +70,27 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import Pagination from '@/components/tables/Pagination.vue'
 import { useToast } from '@/composables/useToast'
 
 const toast = useToast()
 
 const types = ref([])
+const typesPage = ref(1)
+const TYPES_PER_PAGE = 10
+
+const pagedTypes = computed(() => {
+  const start = (typesPage.value - 1) * TYPES_PER_PAGE
+  return types.value.slice(start, start + TYPES_PER_PAGE)
+})
+
+const typesMeta = computed(() => {
+  const total = types.value.length
+  const lastPage = Math.max(1, Math.ceil(total / TYPES_PER_PAGE))
+  const from = total > 0 ? (typesPage.value - 1) * TYPES_PER_PAGE + 1 : 0
+  const to = Math.min(typesPage.value * TYPES_PER_PAGE, total)
+  return { current_page: typesPage.value, last_page: lastPage, from, to, total }
+})
 const modalOpen = ref(false)
 const saving = ref(false)
 const editingId = ref(null)

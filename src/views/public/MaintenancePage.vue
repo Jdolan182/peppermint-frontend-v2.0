@@ -31,24 +31,35 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { usePublicModules } from '@/composables/publicModules'
+import { useAxios } from '@/composables/request'
+import { config } from '@/config'
 
-const { siteName, maintenanceMessage } = usePublicModules()
+const { siteName, maintenanceMessage, fetchPublicModules } = usePublicModules()
+
+onMounted(fetchPublicModules)
 const initial = computed(() => siteName.value?.[0]?.toUpperCase() ?? 'P')
 
-const showBypass = !!import.meta.env.VITE_MAINTENANCE_PASSWORD
+const showBypass = config.maintenance.bypass
 
 const router = useRouter()
 const password = ref('')
 const error = ref(false)
 
-function attemptBypass() {
-  if (password.value === import.meta.env.VITE_MAINTENANCE_PASSWORD) {
-    localStorage.setItem('maintenance_bypass', password.value)
-    router.push({ name: 'Home' })
-  } else {
+async function attemptBypass() {
+  error.value = false
+  try {
+    const res = await useAxios.post('/api/maintenance/unlock', { password: password.value })
+    if (res?.status === 200) {
+      localStorage.setItem('pm_bypass_token', res.data.token)
+      router.push({ name: 'Home' })
+    } else {
+      error.value = true
+      password.value = ''
+    }
+  } catch {
     error.value = true
     password.value = ''
   }

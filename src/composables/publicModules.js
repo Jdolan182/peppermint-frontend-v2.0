@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ref } from 'vue'
+import { config } from '@/config'
 
 // Module-level singleton — shared across all imports in the same app instance
 const modules = ref({})
@@ -9,7 +10,8 @@ const TTL = 30_000
 
 const maintenance = ref(false)
 const maintenanceMessage = ref("We'll be back soon.")
-const siteName = ref('Peppermint')
+const siteName = ref(config.admin.name)
+const consumerLabel = ref('Consumer')
 
 async function fetchPublicModules() {
   const now = Date.now()
@@ -20,7 +22,8 @@ async function fetchPublicModules() {
       modules.value = res.data
       maintenance.value = res.data.maintenance === true
       maintenanceMessage.value = res.data.maintenance_message || "We'll be back soon."
-      siteName.value = res.data.site_name || 'Peppermint'
+      siteName.value = res.data.site_name || config.admin.name
+      consumerLabel.value = res.data.consumer_label || 'Consumer'
       loaded.value = true
       cacheAt = now
     }
@@ -34,8 +37,7 @@ function invalidatePublicModulesCache() {
 }
 
 function isPublicModuleEnabled(name) {
-  const envKey = 'VITE_MODULE_' + name.toUpperCase()
-  if (import.meta.env[envKey] !== 'true') return false
+  if (!config.modules[name]) return false
   if (!loaded.value) return true
   if (Object.prototype.hasOwnProperty.call(modules.value, name)) {
     return modules.value[name] === true
@@ -50,6 +52,7 @@ export function usePublicModules() {
     maintenance,
     maintenanceMessage,
     siteName,
+    consumerLabel,
     fetchPublicModules,
     invalidatePublicModulesCache,
     isPublicModuleEnabled,

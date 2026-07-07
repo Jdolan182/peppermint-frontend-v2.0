@@ -2,19 +2,25 @@
   <div>
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Consumers</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage consumer accounts</p>
+        <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ consumerLabel }}s</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage {{ consumerLabel.toLowerCase() }} accounts</p>
       </div>
       <button
         class="rounded-lg bg-gray-900 dark:bg-white px-4 py-2 text-sm font-semibold text-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors"
         @click="openAdd"
       >
-        Add consumer
+        Add {{ consumerLabel.toLowerCase() }}
       </button>
     </div>
 
     <div class="mt-8">
-      <DataTable :columns="columns" :rows="consumers" empty-message="No consumers yet.">
+      <DataTable :columns="columns" :rows="consumers" :empty-message="`No ${consumerLabel.toLowerCase()}s yet.`">
+        <template #cell-is_active="{ value }">
+          <span
+            class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+            :class="value ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'"
+          >{{ value ? 'Active' : 'Inactive' }}</span>
+        </template>
         <template #actions="{ row }">
           <button class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium mr-4" @click="openEdit(row)">Edit</button>
           <button class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium" @click="openDelete(row)">Delete</button>
@@ -26,6 +32,7 @@
     <ConsumerFormModal
       v-model="showForm"
       :consumer="editing"
+      :label="consumerLabel"
       :loading="saving"
       :errors="formErrors"
       @submit="handleSubmit"
@@ -33,7 +40,7 @@
 
     <ConfirmModal
       v-model="showConfirm"
-      title="Delete consumer"
+      :title="`Delete ${consumerLabel.toLowerCase()}`"
       :message="`Are you sure you want to delete ${deleting?.name}? This cannot be undone.`"
       :loading="deleting && deletingLoading"
       @confirm="handleDelete"
@@ -42,8 +49,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
+import { useModulesStore } from '@/store/admin/modules'
 import { formatDateTime } from '@/helpers/date'
 import DataTable from '@/components/tables/DataTable.vue'
 import Pagination from '@/components/tables/Pagination.vue'
@@ -52,10 +60,13 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import { useToast } from '@/composables/useToast'
 
 const toast = useToast()
+const modulesStore = useModulesStore()
+const consumerLabel = computed(() => modulesStore.settings.consumer_label || 'Consumer')
 
 const columns = [
   { key: 'name', label: 'Name' },
   { key: 'email', label: 'Email' },
+  { key: 'is_active', label: 'Status' },
   { key: 'created_at', label: 'Created', format: formatDateTime },
 ]
 
@@ -74,7 +85,7 @@ const deletingLoading = ref(false)
 
 async function fetchPage(page = 1) {
   currentPage.value = page
-  const res = await useAxios.get('/api/admin/consumers', { params: { page, per_page: 15 } })
+  const res = await useAxios.get('/api/admin/consumers', { params: { page, per_page: 30 } })
   if (res?.data) {
     consumers.value = res.data.data
     meta.value = res.data.meta
@@ -109,14 +120,14 @@ async function handleSubmit(data) {
   }
 
   if (res?.status === 200 || res?.status === 201) {
-    toast.success(editing.value ? 'Consumer updated' : 'Consumer created')
+    toast.success(editing.value ? `${consumerLabel.value} updated` : `${consumerLabel.value} created`)
     showForm.value = false
     await fetchPage(currentPage.value)
   } else if (res?.response?.status === 422) {
     const errs = res.response.data?.errors ?? {}
     formErrors.value = Object.fromEntries(Object.entries(errs).map(([k, v]) => [k, v[0]]))
   } else {
-    toast.error('Failed to save consumer')
+    toast.error(`Failed to save ${consumerLabel.value.toLowerCase()}`)
   }
   saving.value = false
 }
@@ -125,12 +136,12 @@ async function handleDelete() {
   deletingLoading.value = true
   const res = await useAxios.delete(`/api/admin/consumers/${deleting.value.id}`)
   if (res?.status === 200) {
-    toast.success('Consumer deleted')
+    toast.success(`${consumerLabel.value} deleted`)
     showConfirm.value = false
     deleting.value = null
     await fetchPage(currentPage.value)
   } else {
-    toast.error('Failed to delete consumer')
+    toast.error(`Failed to delete ${consumerLabel.value.toLowerCase()}`)
   }
   deletingLoading.value = false
 }

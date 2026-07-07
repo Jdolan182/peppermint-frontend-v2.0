@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useAxios } from '@/composables/request'
+import { config } from '@/config'
 
 export const useModulesStore = defineStore('modules', {
   state: () => ({
@@ -21,8 +22,7 @@ export const useModulesStore = defineStore('modules', {
     // Checks both layers: env var (licence) AND DB setting (on/off toggle)
     // Absence of a DB setting defaults to enabled — modules are on until explicitly turned off
     isEnabled: (state) => (name) => {
-      const envKey = 'VITE_MODULE_' + name.toUpperCase()
-      if (import.meta.env[envKey] !== 'true') return false
+      if (!config.modules[name]) return false
       const dbKey = 'module_' + name.toLowerCase()
       return state.settings[dbKey] !== 'false'
     },

@@ -3,12 +3,21 @@
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Pages</h1>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Build and manage your public pages</p>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Build and manage your public pages
+          <span v-if="pageLimit !== null" class="ml-2 font-medium" :class="limitClass">
+            ({{ pageCount }} / {{ pageLimit }} used)
+          </span>
+        </p>
       </div>
-      <button
-        @click="createPage"
-        class="rounded-lg bg-gray-900 dark:bg-white px-4 py-2 text-sm font-semibold text-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors"
-      >New page</button>
+      <div class="flex flex-col items-end gap-1">
+        <button
+          @click="createPage"
+          :disabled="atLimit"
+          class="rounded-lg bg-gray-900 dark:bg-white px-4 py-2 text-sm font-semibold text-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >New page</button>
+        <p v-if="atLimit" class="text-xs text-red-500">Page limit reached</p>
+      </div>
     </div>
 
     <div class="mt-8">
@@ -43,7 +52,7 @@
                   <span v-else class="w-4 flex-shrink-0" />
                   <span
                     class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                    :class="page.is_published ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'"
+                    :class="publishedClass(page)"
                   >{{ page.is_published ? 'Live' : 'Draft' }}</span>
                   <span v-if="page.is_home" class="inline-flex items-center rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 px-2 py-0.5 text-xs font-medium">Home</span>
                   <span class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ page.title }}</span>
@@ -53,7 +62,7 @@
                 <div class="flex items-center gap-2 flex-shrink-0">
                   <button
                     @click="router.push({ name: 'PageEditor', params: { id: page.id } })"
-                    class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium"
                   >Edit</button>
                   <button
                     @click="deletePage(page)"
@@ -78,7 +87,7 @@
                       <span class="text-gray-300 dark:text-gray-600 select-none">↳</span>
                       <span
                         class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
-                        :class="child.is_published ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'"
+                        :class="publishedClass(child)"
                       >{{ child.is_published ? 'Live' : 'Draft' }}</span>
                       <span class="text-sm text-gray-700 dark:text-gray-300 truncate">{{ child.title }}</span>
                       <span class="text-xs text-gray-400">/{{ child.slug }}</span>
@@ -86,7 +95,7 @@
                     <div class="flex items-center gap-2 flex-shrink-0">
                       <button
                         @click="router.push({ name: 'PageEditor', params: { id: child.id } })"
-                        class="rounded-lg px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium"
                       >Edit</button>
                       <button
                         @click="deletePage(child)"
@@ -105,23 +114,50 @@
         <p class="text-sm text-gray-500 dark:text-gray-400">No pages yet. Create your first page to get started.</p>
       </div>
     </div>
+
+    <ConfirmModal
+      v-model="showConfirm"
+      title="Delete page"
+      :message="deleteMessage"
+      :loading="deletingLoading"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAxios } from '@/composables/request'
 import draggable from 'vuedraggable'
 import { ChevronRightIcon } from '@heroicons/vue/24/outline'
 import { useToast } from '@/composables/useToast'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 
 const toast = useToast()
 
 const router = useRouter()
 const pages = ref([])
+const pageLimit = ref(null)
 const loading = ref(true)
 const expanded = ref({})
+
+const showConfirm = ref(false)
+const deletingPage = ref(null)
+const deletingLoading = ref(false)
+
+const pageCount = computed(() =>
+  pages.value.reduce((sum, p) => sum + 1 + (p.children?.length ?? 0), 0)
+)
+const atLimit = computed(() => pageLimit.value !== null && pageCount.value >= pageLimit.value)
+const deleteMessage = computed(() => deletingPage.value ? `Delete "${deletingPage.value.title}"? This cannot be undone.` : '')
+const limitClass = computed(() => atLimit.value ? 'text-red-500' : 'text-gray-400')
+
+function publishedClass(item) {
+  return item.is_published
+    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+    : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+}
 
 function toggleExpanded(id) {
   expanded.value = { ...expanded.value, [id]: !expanded.value[id] }
@@ -130,24 +166,36 @@ function toggleExpanded(id) {
 async function load() {
   loading.value = true
   const res = await useAxios.get('/api/admin/pages')
-  pages.value = res?.data ?? []
+  pages.value = res?.data?.pages ?? []
+  pageLimit.value = res?.data?.page_limit ?? null
   loading.value = false
 }
 
 async function createPage() {
+  if (atLimit.value) return
   const res = await useAxios.post('/api/admin/pages', { title: 'New page', slug: '' })
   if (res?.data?.id) {
     router.push({ name: 'PageEditor', params: { id: res.data.id } })
   }
 }
 
-async function deletePage(page) {
-  if (!confirm(`Delete "${page.title}"?`)) return
-  const res = await useAxios.delete(`/api/admin/pages/${page.id}`)
+function deletePage(page) {
+  deletingPage.value = page
+  showConfirm.value = true
+}
+
+async function confirmDelete() {
+  deletingLoading.value = true
+  const res = await useAxios.delete(`/api/admin/pages/${deletingPage.value.id}`)
   if (res?.status === 200 || res?.status === 204) {
     toast.success('Page deleted')
+    showConfirm.value = false
+    deletingPage.value = null
+    await load()
+  } else {
+    toast.error('Failed to delete page')
   }
-  await load()
+  deletingLoading.value = false
 }
 
 async function saveNavOrder() {

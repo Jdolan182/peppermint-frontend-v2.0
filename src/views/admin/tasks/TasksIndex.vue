@@ -135,7 +135,7 @@
           </thead>
           <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
             <tr
-              v-for="task in activeTasks"
+              v-for="task in pagedActiveTasks"
               :key="task.id"
               @click="openEdit(task)"
               class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
@@ -159,6 +159,7 @@
           </tbody>
         </table>
       </div>
+      <Pagination :meta="listMeta" class="mt-2" @change="listPage = $event" />
 
       <!-- Completed tasks (collapsed) -->
       <div v-if="closedListTasks.length">
@@ -175,7 +176,7 @@
           <table class="w-full text-sm">
             <tbody class="divide-y divide-gray-100 dark:divide-gray-700 opacity-60">
               <tr
-                v-for="task in closedListTasks"
+                v-for="task in pagedClosedTasks"
                 :key="task.id"
                 @click="openEdit(task)"
                 class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
@@ -198,6 +199,7 @@
               </tr>
             </tbody>
           </table>
+          <Pagination :meta="closedMeta" class="mt-2 px-4 pb-3" @change="closedPage = $event" />
         </div>
       </div>
     </div>
@@ -221,6 +223,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
 import { useToast } from '@/composables/useToast'
 import TaskDrawer from '@/components/tasks/TaskDrawer.vue'
+import Pagination from '@/components/tables/Pagination.vue'
 import { useUserStore } from '@/store/admin/user'
 import draggable from 'vuedraggable'
 
@@ -242,6 +245,9 @@ const drawerOpen = ref(false)
 const editingTask = ref(null)
 
 const completedOpen = ref(false)
+const listPage = ref(1)
+const closedPage = ref(1)
+const LIST_PER_PAGE = 30
 
 const filteredTasks = computed(() => {
   return tasks.value.filter(t => {
@@ -257,7 +263,35 @@ const filteredTasks = computed(() => {
 const activeTasks = computed(() => filteredTasks.value.filter(t => !t.status?.is_closed))
 const closedListTasks = computed(() => filteredTasks.value.filter(t => t.status?.is_closed))
 
+const pagedActiveTasks = computed(() => {
+  const start = (listPage.value - 1) * LIST_PER_PAGE
+  return activeTasks.value.slice(start, start + LIST_PER_PAGE)
+})
+
+const pagedClosedTasks = computed(() => {
+  const start = (closedPage.value - 1) * LIST_PER_PAGE
+  return closedListTasks.value.slice(start, start + LIST_PER_PAGE)
+})
+
+const listMeta = computed(() => {
+  const total = activeTasks.value.length
+  const lastPage = Math.max(1, Math.ceil(total / LIST_PER_PAGE))
+  const from = total > 0 ? (listPage.value - 1) * LIST_PER_PAGE + 1 : 0
+  const to = Math.min(listPage.value * LIST_PER_PAGE, total)
+  return { current_page: listPage.value, last_page: lastPage, from, to, total }
+})
+
+const closedMeta = computed(() => {
+  const total = closedListTasks.value.length
+  const lastPage = Math.max(1, Math.ceil(total / LIST_PER_PAGE))
+  const from = total > 0 ? (closedPage.value - 1) * LIST_PER_PAGE + 1 : 0
+  const to = Math.min(closedPage.value * LIST_PER_PAGE, total)
+  return { current_page: closedPage.value, last_page: lastPage, from, to, total }
+})
+
 const kanbanColumns = ref([])
+
+watch(filters, () => { listPage.value = 1; closedPage.value = 1 }, { deep: true })
 
 watch(
   [filteredTasks, statuses],
@@ -324,8 +358,8 @@ async function load() {
     useAxios.get('/api/admin/tasks'),
     useAxios.get('/api/admin/task-types'),
     useAxios.get('/api/admin/task-statuses'),
-    useAxios.get('/api/admin/users'),
-    useAxios.get('/api/admin/consumers'),
+    useAxios.get('/api/admin/users', { params: { per_page: 500 } }),
+    useAxios.get('/api/admin/consumers', { params: { per_page: 500 } }),
     useAxios.get('/api/admin/roadmap'),
   ])
   tasks.value = tasksRes?.data ?? []

@@ -1,8 +1,9 @@
 import { UserGroupIcon } from '@heroicons/vue/24/outline'
+import { config } from '@/config'
 
 export const TeamRoutes = [
   {
-    path: '/' + import.meta.env.VITE_MODULE_ADMIN_NAME.toLowerCase() + '/team/users',
+    path: '/' + config.admin.slug + '/team/users',
     meta: {
       requiresAuth: true,
       layout: 'admin',

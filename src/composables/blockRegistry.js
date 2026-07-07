@@ -117,22 +117,6 @@ export const PAGE_BLOCKS = [
     ],
   },
   {
-    type: 'newsletter',
-    label: 'Newsletter',
-    defaultData: {
-      heading: '',
-      subheading: '',
-      placeholder: 'Enter your email',
-      button_label: 'Subscribe',
-    },
-    fields: [
-      { key: 'heading',      label: 'Heading',          type: 'text' },
-      { key: 'subheading',   label: 'Subheading',       type: 'text' },
-      { key: 'placeholder',  label: 'Input placeholder', type: 'text' },
-      { key: 'button_label', label: 'Button label',      type: 'text' },
-    ],
-  },
-  {
     type: 'stats',
     label: 'Stats',
     defaultData: { items: [] },
@@ -296,20 +280,6 @@ export const FOOTER_BLOCKS = [
           { key: 'url',      label: 'URL',      type: 'url' },
         ],
       },
-    ],
-  },
-  {
-    type: 'footer-newsletter',
-    label: 'Newsletter',
-    defaultData: {
-      heading: '',
-      placeholder: 'Enter your email',
-      button_label: 'Subscribe',
-    },
-    fields: [
-      { key: 'heading',      label: 'Heading',          type: 'text' },
-      { key: 'placeholder',  label: 'Input placeholder', type: 'text' },
-      { key: 'button_label', label: 'Button label',      type: 'text' },
     ],
   },
   {

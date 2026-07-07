@@ -1,3 +1,4 @@
+import { config } from '@/config'
 import { DashboardRoutes } from "./dashboard"
 import { PeppermintRoutes } from "./peppermint"
 import { ConsumerRoutes } from "./consumers"
@@ -10,42 +11,42 @@ import { RoadmapRoutes } from "./roadmap"
 import { CalendarRoutes } from "./calendar"
 
 export function getAdminRoutes() {
-  if (import.meta.env.VITE_MODULE_ADMIN !== 'true') return []
+  if (!config.modules.admin) return []
 
   const routes = [
     ...DashboardRoutes,
     ...PeppermintRoutes,
   ]
 
-  if (import.meta.env.VITE_MODULE_CONSUMERS === 'true') {
+  if (config.modules.consumers) {
     routes.push(...ConsumerRoutes)
   }
 
-  if (import.meta.env.VITE_MODULE_TEAM === 'true') {
+  if (config.modules.team) {
     routes.push(...TeamRoutes)
   }
 
-  if (import.meta.env.VITE_MODULE_SETTINGS === 'true') {
+  if (config.modules.settings) {
     routes.push(...SettingsRoutes)
   }
 
-  if (import.meta.env.VITE_MODULE_BLOGS === 'true') {
+  if (config.modules.blogs) {
     routes.push(...BlogRoutes)
   }
 
-  if (import.meta.env.VITE_MODULE_PAGES === 'true') {
+  if (config.modules.pages) {
     routes.push(...PagesRoutes)
   }
 
-  if (import.meta.env.VITE_MODULE_TASKS === 'true') {
+  if (config.modules.tasks) {
     routes.push(...TasksRoutes)
   }
 
-  if (import.meta.env.VITE_MODULE_ROADMAP === 'true') {
+  if (config.modules.roadmap) {
     routes.push(...RoadmapRoutes)
   }
 
-  if (import.meta.env.VITE_MODULE_TASKS === 'true' || import.meta.env.VITE_MODULE_ROADMAP === 'true') {
+  if (config.modules.tasks || config.modules.roadmap) {
     routes.push(...CalendarRoutes)
   }
 

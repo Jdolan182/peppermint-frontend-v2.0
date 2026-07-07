@@ -15,9 +15,19 @@
 
     <div class="mt-8">
       <DataTable :columns="columns" :rows="users" empty-message="No admin users yet.">
+        <template #cell-is_active="{ value }">
+          <span
+            class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
+            :class="value ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'"
+          >{{ value ? 'Active' : 'Inactive' }}</span>
+        </template>
         <template #actions="{ row }">
           <button class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 font-medium mr-4" @click="openEdit(row)">Edit</button>
-          <button v-if="String(row.id) !== String(userStore.userId)" class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium" @click="openDelete(row)">Delete</button>
+          <button
+            v-if="!row.is_default && String(row.id) !== String(userStore.userId)"
+            class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium"
+            @click="openDelete(row)"
+          >Delete</button>
         </template>
       </DataTable>
       <Pagination :meta="meta" class="mt-3" @change="fetchPage" />
@@ -59,6 +69,7 @@ import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 const columns = [
   { key: 'name', label: 'Name' },
   { key: 'email', label: 'Email' },
+  { key: 'is_active', label: 'Status' },
   { key: 'created_at', label: 'Created', format: formatDateTime },
 ]
 
@@ -77,7 +88,7 @@ const deletingLoading = ref(false)
 
 async function fetchPage(page = 1) {
   currentPage.value = page
-  const res = await useAxios.get('/api/admin/users', { params: { page, per_page: 15 } })
+  const res = await useAxios.get('/api/admin/users', { params: { page, per_page: 30 } })
   if (res?.data) {
     users.value = res.data.data
     meta.value = res.data.meta
@@ -118,6 +129,8 @@ async function handleSubmit(data) {
   } else if (res?.response?.status === 422) {
     const errs = res.response.data?.errors ?? {}
     formErrors.value = Object.fromEntries(Object.entries(errs).map(([k, v]) => [k, v[0]]))
+  } else {
+    toast.error('Failed to save user')
   }
   saving.value = false
 }

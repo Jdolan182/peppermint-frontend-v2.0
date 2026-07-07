@@ -3,8 +3,9 @@ import SignInForm from '@/components/forms/SignInForm.vue'
 import { useAxios } from '@/composables/request.js'
 import { useConsumerUserStore } from '@/store/consumer/user'
 import { useRouter } from 'vue-router'
+import { usePublicModules } from '@/composables/publicModules.js'
 
-const adminName = import.meta.env.VITE_MODULE_ADMIN_NAME
+const { siteName } = usePublicModules()
 
 const userStore = useConsumerUserStore()
 const router = useRouter()
@@ -44,7 +45,7 @@ const login = async ({ params, form }) => {
           <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
             <span class="text-white font-bold text-lg">P</span>
           </div>
-          <span class="text-2xl font-bold">{{ adminName }}</span>
+          <span class="text-2xl font-bold">{{ siteName }}</span>
         </div>
         <h1 class="text-4xl font-bold leading-tight">
           Welcome back
@@ -63,10 +64,14 @@ const login = async ({ params, form }) => {
           <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
             <span class="text-white font-bold text-sm">P</span>
           </div>
-          <span class="text-xl font-bold text-gray-900">{{ adminName }}</span>
+          <span class="text-xl font-bold text-gray-900">{{ siteName }}</span>
         </div>
 
-        <SignInForm :title="`Sign in to ${adminName}`" @login="login" />
+        <SignInForm :title="`Sign in to ${siteName}`" @login="login" />
+
+        <p class="mt-4 text-center text-sm text-gray-500">
+          <RouterLink to="/forgot-password" class="text-emerald-600 hover:underline">Forgot password?</RouterLink>
+        </p>
 
         <div class="mt-6 rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 text-sm text-gray-600">
           <p class="font-medium text-gray-700 mb-1">Try the demo</p>

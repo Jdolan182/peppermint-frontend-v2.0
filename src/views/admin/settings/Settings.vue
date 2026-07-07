@@ -31,6 +31,11 @@
             <Label label="Site name" />
             <Input v-model="form.site_name" placeholder="Peppermint" />
           </div>
+          <div>
+            <Label label="Consumer display name" />
+            <Input v-model="form.consumer_label" placeholder="Consumer" />
+            <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Replaces "Consumer" labels across the UI (e.g. "Customer", "Client"). Leave blank for the default.</p>
+          </div>
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-medium text-gray-900 dark:text-white">Maintenance mode</p>
@@ -145,6 +150,7 @@ import { useAxios } from '@/composables/request'
 import { useModulesStore } from '@/store/admin/modules'
 import { usePublicModules } from '@/composables/publicModules'
 import { useToast } from '@/composables/useToast'
+import { config } from '@/config'
 
 const toast = useToast()
 import Input from '@/components/inputs/Input.vue'
@@ -178,25 +184,25 @@ watch(visibleTabs, (tabs) => {
 
 // All possible toggleable modules — only shown if licensed (env var set)
 const allModules = [
-  { key: 'module_blogs',        envKey: 'VITE_MODULE_BLOGS',        label: 'Blogs',        description: 'Blog posts, categories, and the public blog pages.' },
-  { key: 'module_consumers',    envKey: 'VITE_MODULE_CONSUMERS',    label: 'Consumers',    description: 'Consumer accounts and data.' },
-  { key: 'module_public_login', envKey: 'VITE_MODULE_PUBLIC_LOGIN', label: 'Public login', description: 'Lets visitors sign in or sign up on the public site.' },
-  { key: 'module_team',         envKey: 'VITE_MODULE_TEAM',         label: 'Team',         description: 'Admin user management and team roles.' },
-  { key: 'module_public',       envKey: 'VITE_MODULE_PUBLIC',       label: 'Public',       description: 'The consumer-facing public site.' },
-  { key: 'module_pages',             envKey: 'VITE_MODULE_PAGES',             label: 'Pages',             description: 'Page builder — create and publish custom pages.' },
-  { key: 'module_tasks',             envKey: 'VITE_MODULE_TASKS',             label: 'Tasks',             description: 'Task management with kanban board and types.' },
-  { key: 'module_tasks_consumer',    envKey: 'VITE_MODULE_TASKS',             label: 'Tasks — consumer',  description: 'Allow consumers to view tasks assigned to them.' },
-  { key: 'module_roadmap',           envKey: 'VITE_MODULE_ROADMAP',           label: 'Roadmap',           description: 'Plan and track what\'s coming — visible to admins.' },
-  { key: 'module_roadmap_public',    envKey: 'VITE_MODULE_ROADMAP',           label: 'Roadmap — public',  description: 'Show a public-facing roadmap page to all visitors.' },
-  { key: 'module_appointments',      envKey: 'VITE_MODULE_TASKS',             label: 'Appointments',      description: 'Allow consumers to request appointments.' },
+  { key: 'module_blogs',           module: 'blogs',        label: 'Blogs',            description: 'Blog posts, categories, and the public blog pages.' },
+  { key: 'module_consumers',       module: 'consumers',    label: 'Consumers',        description: 'Consumer accounts and data.' },
+  { key: 'module_public_login',    module: 'public_login', label: 'Public login',     description: 'Lets visitors sign in or sign up on the public site.' },
+  { key: 'module_team',            module: 'team',         label: 'Team',             description: 'Admin user management and team roles.' },
+  { key: 'module_public',          module: 'public',       label: 'Public',           description: 'The consumer-facing public site.' },
+  { key: 'module_pages',           module: 'pages',        label: 'Pages',            description: 'Page builder — create and publish custom pages.' },
+  { key: 'module_tasks',           module: 'tasks',        label: 'Tasks',            description: 'Task management with kanban board and types.' },
+  { key: 'module_tasks_consumer',  module: 'tasks',        label: 'Tasks — consumer', description: 'Allow consumers to view tasks assigned to them.' },
+  { key: 'module_roadmap',         module: 'roadmap',      label: 'Roadmap',          description: 'Plan and track what\'s coming — visible to admins.' },
+  { key: 'module_roadmap_public',  module: 'roadmap',      label: 'Roadmap — public', description: 'Show a public-facing roadmap page to all visitors.' },
 ]
 
 const licensedModules = computed(() =>
-  allModules.filter(m => import.meta.env[m.envKey] === 'true')
+  allModules.filter(m => config.modules[m.module])
 )
 
 const form = ref({
   site_name: '',
+  consumer_label: '',
   maintenance_enabled: false,
   maintenance_message: '',
   blog_title: '',
@@ -211,7 +217,6 @@ const form = ref({
   module_tasks_consumer: true,
   module_roadmap: true,
   module_roadmap_public: true,
-  module_appointments: true,
 })
 
 const saving = ref(false)
@@ -221,6 +226,7 @@ onMounted(async () => {
   if (res?.data) {
     const s = res.data
     form.value.site_name            = s.site_name            ?? ''
+    form.value.consumer_label       = s.consumer_label       ?? ''
     form.value.maintenance_enabled  = s.maintenance_enabled  === 'true'
     form.value.maintenance_message  = s.maintenance_message  ?? ''
     form.value.blog_title           = s.blog_title           ?? ''
@@ -235,13 +241,19 @@ onMounted(async () => {
     form.value.module_tasks_consumer   = s.module_tasks_consumer   !== 'false'
     form.value.module_roadmap          = s.module_roadmap          !== 'false'
     form.value.module_roadmap_public   = s.module_roadmap_public   !== 'false'
-    form.value.module_appointments     = s.module_appointments     !== 'false'
   }
 })
 
 async function handleSave(tab = 'general') {
   saving.value = true
-  const res = await useAxios.put('/api/admin/settings', form.value)
+  let payload
+  if (tab === 'blog') {
+    payload = { blog_title: form.value.blog_title, blog_description: form.value.blog_description }
+  } else {
+    const { blog_title, blog_description, ...generalFields } = form.value
+    payload = generalFields
+  }
+  const res = await useAxios.put('/api/admin/settings', payload)
   if (res?.status === 200) {
     toast.success('Settings saved')
     await modulesStore.fetch()

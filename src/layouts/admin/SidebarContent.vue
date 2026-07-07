@@ -76,6 +76,7 @@
 
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue'
+import { config } from '@/config'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/admin/auth'
 import { useModulesStore } from '@/store/admin/modules'
@@ -91,8 +92,9 @@ const route = useRoute()
 const authStore = useAuthStore()
 const modulesStore = useModulesStore()
 
-const siteName = computed(() => modulesStore.settings.site_name || import.meta.env.VITE_MODULE_ADMIN_NAME || 'Peppermint')
-const dashboardName = import.meta.env.VITE_MODULE_ADMIN_DASHBOARD_NAME
+const siteName = computed(() => modulesStore.settings.site_name || config.admin.name)
+const dashboardName = config.admin.dashboardName
+const consumerLabel = computed(() => modulesStore.settings.consumer_label || 'Consumer')
 
 const contactUnread = ref(0)
 
@@ -107,9 +109,9 @@ onMounted(fetchUnreadCount)
 watch(() => route.path, fetchUnreadCount)
 
 // module is the short name e.g. 'blogs', null means always visible
-const allNav = [
+const allNav = computed(() => [
   { name: dashboardName, routeName: 'Dashboard', icon: HomeIcon, module: null },
-  { name: 'Consumers', routeName: 'Consumers', icon: UsersIcon, module: 'consumers' },
+  { name: consumerLabel.value + 's', routeName: 'Consumers', icon: UsersIcon, module: 'consumers' },
   { type: 'section', label: 'Content', module: 'blogs' },
   { name: 'Blogs', routeName: 'Blogs', icon: NewspaperIcon, module: 'blogs' },
   { type: 'section', label: 'Pages', module: 'pages' },
@@ -123,7 +125,7 @@ const allNav = [
   { type: 'section', label: 'Team', module: 'team' },
   { name: 'Admin Users', routeName: 'AdminUsers', icon: UserGroupIcon, module: 'team' },
   { name: 'Settings', routeName: 'Settings', icon: Cog6ToothIcon, module: 'settings' },
-]
+])
 
 function moduleVisible(mod) {
   if (mod === null) return true
@@ -132,7 +134,7 @@ function moduleVisible(mod) {
 }
 
 const visibleNav = computed(() => {
-  return allNav.filter(item => moduleVisible(item.module))
+  return allNav.value.filter(item => moduleVisible(item.module))
 })
 
 const isActive = (routeName) => route.name === routeName

@@ -1,8 +1,9 @@
 import { HomeIcon } from '@heroicons/vue/24/outline'
+import { config } from '@/config'
 
 export const DashboardRoutes = [
   {
-    path: '/' + import.meta.env.VITE_MODULE_ADMIN_NAME.toLowerCase() + '/dashboard',
+    path: '/' + config.admin.slug + '/dashboard',
     meta: { 
       requiresAuth: true,
       layout: 'admin',

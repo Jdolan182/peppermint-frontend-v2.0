@@ -44,7 +44,7 @@
       </dl>
       <dl v-else class="grid grid-cols-2 gap-4 sm:grid-cols-5">
         <div
-          v-for="item in stats"
+          v-for="item in visibleStats"
           :key="item.label"
           class="overflow-hidden rounded-xl bg-white dark:bg-gray-800 px-5 py-5 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700"
         >
@@ -135,7 +135,7 @@
             :to="{ name: 'Tasks' }"
             class="block w-full text-center rounded-lg bg-gray-900 dark:bg-white px-4 py-2 text-sm font-semibold text-white dark:text-gray-900 hover:bg-gray-700 dark:hover:bg-gray-100 transition-colors"
             @click="selectedTask = null"
-          >Open in Tasks</router-link>
+          >View all tasks</router-link>
         </div>
       </div>
     </div>
@@ -143,10 +143,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAxios } from '@/composables/request'
 import { useModulesStore } from '@/store/admin/modules'
+import { config } from '@/config'
 
 const modulesStore = useModulesStore()
 
@@ -155,6 +156,15 @@ const myTasksLoading = ref(true)
 const stats = ref([])
 const statsLoading = ref(true)
 const selectedTask = ref(null)
+
+const TASK_STAT_LABELS = new Set(['Open tasks', 'Assigned to me', 'Overdue', 'Completed'])
+const visibleStats = computed(() => {
+  const tasksOn = config.modules.tasks && modulesStore.settings['module_tasks'] !== 'false'
+  const roadmapOn = config.modules.roadmap && modulesStore.settings['module_roadmap'] !== 'false'
+  return stats.value.filter(s =>
+    TASK_STAT_LABELS.has(s.label) ? tasksOn : roadmapOn
+  )
+})
 
 function priorityClass(p) {
   return {

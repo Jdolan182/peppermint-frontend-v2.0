@@ -1,6 +1,8 @@
+import { config } from '@/config'
+
 export const PagesRoutes = [
   {
-    path: '/' + import.meta.env.VITE_MODULE_ADMIN_NAME.toLowerCase() + '/pages',
+    path: '/' + config.admin.slug + '/pages',
     meta: {
       requiresAuth: true,
       layout: 'admin',

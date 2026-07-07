@@ -146,12 +146,13 @@ const useAxios = {
       error
     ) => {
       if (error.response?.status === 401) {
+        const url = error.config?.url ?? ''
         const adminAuth = useAuthStore()
         const consumerAuth = useConsumerAuthStore()
 
-        if (adminAuth.getIsLoggedIn) {
+        if (url.includes('/api/admin/') && adminAuth.getIsLoggedIn) {
           adminAuth.logout()
-        } else if (consumerAuth.getIsLoggedIn) {
+        } else if (url.includes('/api/consumer/') && consumerAuth.getIsLoggedIn) {
           consumerAuth.logout()
         }
       }

@@ -42,7 +42,7 @@
           type="button"
           @mousedown.prevent="select(opt)"
           class="w-full text-left px-3 py-2 text-sm text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-2"
-          :class="modelValue === opt.id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''"
+          :class="modelValue != null && modelValue == opt.id ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''"
         >
           <span v-if="opt.color" class="w-2 h-2 rounded-full flex-shrink-0" :style="{ background: opt.color }" />
           {{ opt.name }}
@@ -71,7 +71,10 @@ const query = ref('')
 const searchInput = ref(null)
 const root = ref(null)
 
-const selected = computed(() => props.options.find(o => o.id === props.modelValue) ?? null)
+const selected = computed(() => {
+  if (props.modelValue == null) return null
+  return props.options.find(o => o.id == props.modelValue) ?? null
+})
 
 const filtered = computed(() => {
   const q = query.value.toLowerCase()

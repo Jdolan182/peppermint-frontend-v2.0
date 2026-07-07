@@ -12,7 +12,7 @@
             <span class="text-indigo-600"> made simple</span>
           </h1>
           <p class="mt-6 text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            Peppermint is a modern CMS built for teams who move fast. Manage your content, users, and pages from one clean interface.
+            {{ siteName }} is a modern CMS built for teams who move fast. Manage your content, users, and pages from one clean interface.
           </p>
           <div class="mt-10 flex items-center justify-center gap-4">
             <router-link
@@ -100,7 +100,7 @@ import {
 } from '@heroicons/vue/24/outline'
 import { usePublicModules } from '@/composables/publicModules'
 
-const { isPublicModuleEnabled } = usePublicModules()
+const { isPublicModuleEnabled, siteName } = usePublicModules()
 const publicLoginEnabled = computed(() => isPublicModuleEnabled('public_login'))
 
 const features = [

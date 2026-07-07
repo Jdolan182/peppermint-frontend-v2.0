@@ -18,6 +18,14 @@
           <Label label="Confirm password" />
           <Input v-model="form.password_confirmation" type="password" :error="!!errors.password_confirmation" :error-message="errors.password_confirmation" />
         </div>
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" v-model="form.is_active" class="rounded border-gray-300 dark:border-gray-600" />
+          <span class="text-sm text-gray-700 dark:text-gray-300">Active (can log in)</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" v-model="form.notify_contact" class="rounded border-gray-300 dark:border-gray-600" />
+          <span class="text-sm text-gray-700 dark:text-gray-300">Notify on contact submissions</span>
+        </label>
       </div>
       <div class="flex justify-end gap-3 mt-6">
         <button
@@ -54,7 +62,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'submit'])
 
-const form = ref({ name: '', email: '', password: '', password_confirmation: '' })
+const form = ref({ name: '', email: '', password: '', password_confirmation: '', is_active: true, notify_contact: false })
 
 watch(() => props.modelValue, (open) => {
   if (open) {
@@ -63,6 +71,8 @@ watch(() => props.modelValue, (open) => {
       email: props.user?.email ?? '',
       password: '',
       password_confirmation: '',
+      is_active: props.user?.is_active ?? true,
+      notify_contact: props.user?.notify_contact ?? false,
     }
   }
 })

@@ -1,6 +1,8 @@
+import { config } from '@/config'
+
 export const CalendarRoutes = [
   {
-    path: '/' + import.meta.env.VITE_MODULE_ADMIN_NAME.toLowerCase() + '/calendar',
+    path: '/' + config.admin.slug + '/calendar',
     meta: {
       requiresAuth: true,
       layout: 'admin',

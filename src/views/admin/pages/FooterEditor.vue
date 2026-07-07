@@ -64,6 +64,14 @@
       </div>
     </div>
   </div>
+
+  <ConfirmModal
+    v-model="confirmOpen"
+    title="Remove footer block"
+    :message="removingSection ? `Remove this ${footerLabel(removingSection.type)} block? This cannot be undone.` : ''"
+    :loading="removing"
+    @confirm="doRemove"
+  />
 </template>
 
 <script setup>
@@ -71,11 +79,15 @@ import { ref, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
 import { FOOTER_BLOCKS, getFooterBlock } from '@/composables/blockRegistry'
 import BlockEditor from '@/components/pages/BlockEditor.vue'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import draggable from 'vuedraggable'
 import { ChevronRightIcon } from '@heroicons/vue/24/outline'
 
 const sections = ref([])
 const collapsed = ref({})
+const confirmOpen = ref(false)
+const removingSection = ref(null)
+const removing = ref(false)
 
 function footerLabel(type) {
   return getFooterBlock(type)?.label ?? type
@@ -103,10 +115,18 @@ async function update(section, data) {
   section.data = data
 }
 
-async function remove(section) {
-  if (!confirm('Remove this footer block?')) return
-  await useAxios.delete(`/api/admin/footer/sections/${section.id}`)
-  sections.value = sections.value.filter(s => s.id !== section.id)
+function remove(section) {
+  removingSection.value = section
+  confirmOpen.value = true
+}
+
+async function doRemove() {
+  removing.value = true
+  await useAxios.delete(`/api/admin/footer/sections/${removingSection.value.id}`)
+  sections.value = sections.value.filter(s => s.id !== removingSection.value.id)
+  removing.value = false
+  confirmOpen.value = false
+  removingSection.value = null
 }
 
 async function saveOrder() {

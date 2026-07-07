@@ -35,7 +35,7 @@
                 class="relative aspect-square rounded-lg overflow-hidden ring-2 transition-all"
                 :class="selected === item.url ? 'ring-indigo-600' : 'ring-transparent hover:ring-gray-300'"
               >
-                <img :src="item.url" :alt="item.alt || item.filename" class="w-full h-full object-cover" />
+                <img :src="storageUrl(item.url)" :alt="item.alt || item.filename" class="w-full h-full object-cover" />
                 <div v-if="selected === item.url" class="absolute inset-0 bg-indigo-600/20 flex items-center justify-center">
                   <span class="text-white text-lg">✓</span>
                 </div>
@@ -99,6 +99,16 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
+import { config } from '@/config'
+
+// The backend returns an absolute URL based on APP_URL, which may not match
+// the actual host the frontend is talking to. Extract just the path and
+// rebuild the URL using config.apiUrl so it always resolves correctly.
+function storageUrl(url) {
+  if (!url) return url
+  const match = url.match(/\/storage\/.+$/)
+  return match ? config.apiUrl + match[0] : url
+}
 
 const props = defineProps({
   modelValue: { type: String, default: null },
@@ -121,7 +131,7 @@ async function loadMedia() {
 }
 
 function select(url) {
-  selected.value = url
+  selected.value = storageUrl(url)
 }
 
 function confirm() {
@@ -147,9 +157,10 @@ async function upload(file) {
   const res = await useAxios.post('/api/admin/media', form)
   if (res?.data) {
     media.value.unshift(res.data)
-    selected.value = res.data.url
+    const url = storageUrl(res.data.url)
+    selected.value = url
     activeTab.value = 'Gallery'
-    emit('update:modelValue', res.data.url)
+    emit('update:modelValue', url)
     emit('close')
   }
   uploading.value = false

@@ -34,10 +34,10 @@
             <button
               v-if="!s.read_at"
               @click="markRead(s)"
-              class="rounded-lg border border-gray-200 dark:border-gray-600 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            >Mark read</button>
+              class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 transition-colors"
+            >Mark as read</button>
             <button
-              @click="remove(s)"
+              @click="openDelete(s)"
               class="rounded-lg border border-red-200 dark:border-red-800 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
             >Delete</button>
           </div>
@@ -59,16 +59,32 @@
         >Next</button>
       </div>
     </div>
+
+    <ConfirmModal
+      v-model="showConfirm"
+      title="Delete submission"
+      :message="deletingSubmission ? `Delete the message from ${deletingSubmission.name}? This cannot be undone.` : ''"
+      :loading="deletingLoading"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
+import { useToast } from '@/composables/useToast'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+
+const toast = useToast()
 
 const submissions = ref([])
 const meta = ref({ current_page: 1, last_page: 1 })
 const loading = ref(true)
+
+const showConfirm = ref(false)
+const deletingSubmission = ref(null)
+const deletingLoading = ref(false)
 
 async function load(page = 1) {
   loading.value = true
@@ -80,15 +96,31 @@ async function load(page = 1) {
 
 async function markRead(s) {
   const res = await useAxios.post(`/api/admin/contact/${s.id}/read`)
-  Object.assign(s, res.data)
+  if (res?.data) {
+    Object.assign(s, res.data)
+    toast.success('Marked as read')
+  } else {
+    toast.error('Failed to mark as read')
+  }
 }
 
-async function remove(s) {
-  if (!confirm('Delete this submission?')) return
-  const res = await useAxios.delete(`/api/admin/contact/${s.id}`)
+function openDelete(s) {
+  deletingSubmission.value = s
+  showConfirm.value = true
+}
+
+async function confirmDelete() {
+  deletingLoading.value = true
+  const res = await useAxios.delete(`/api/admin/contact/${deletingSubmission.value.id}`)
   if (res?.status === 200 || res?.status === 204) {
-    submissions.value = submissions.value.filter(x => x.id !== s.id)
+    submissions.value = submissions.value.filter(x => x.id !== deletingSubmission.value.id)
+    toast.success('Submission deleted')
+    showConfirm.value = false
+    deletingSubmission.value = null
+  } else {
+    toast.error('Failed to delete submission')
   }
+  deletingLoading.value = false
 }
 
 function formatDate(iso) {

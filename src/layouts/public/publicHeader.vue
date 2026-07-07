@@ -66,6 +66,11 @@
               class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
             >My Tasks</router-link>
             <router-link
+              v-if="tasksEnabled"
+              :to="{ name: 'ConsumerCalendar' }"
+              class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            >Calendar</router-link>
+            <router-link
               :to="{ name: 'ConsumerProfile' }"
               class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
             >Profile</router-link>

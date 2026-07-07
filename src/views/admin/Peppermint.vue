@@ -3,8 +3,11 @@ import SignInForm from '@/components/forms/SignInForm.vue'
 import { useAxios } from "@/composables/request.js";
 import { useUserStore } from "@/store/admin/user";
 import { useRouter } from "vue-router";
+import { usePublicModules } from '@/composables/publicModules.js'
+import { config } from '@/config'
 
-const adminName = import.meta.env.VITE_MODULE_ADMIN_NAME
+const adminSlug = config.admin.slug
+const { siteName } = usePublicModules()
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -44,7 +47,7 @@ const login = async ({ params, form }) => {
           <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
             <span class="text-white font-bold text-lg">P</span>
           </div>
-          <span class="text-2xl font-bold">{{ adminName }}</span>
+          <span class="text-2xl font-bold">{{ siteName }}</span>
         </div>
         <h1 class="text-4xl font-bold leading-tight">
           Manage your content with confidence
@@ -83,10 +86,14 @@ const login = async ({ params, form }) => {
           <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
             <span class="text-white font-bold text-sm">P</span>
           </div>
-          <span class="text-xl font-bold text-gray-900 dark:text-white">{{ adminName }}</span>
+          <span class="text-xl font-bold text-gray-900 dark:text-white">{{ siteName }}</span>
         </div>
 
-        <SignInForm :title="`Sign in to ${adminName}`" @login="login" />
+        <SignInForm :title="`Sign in to ${siteName}`" @login="login" />
+
+        <p class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <RouterLink :to="`/${adminSlug}/forgot-password`" class="text-indigo-600 hover:underline">Forgot password?</RouterLink>
+        </p>
       </div>
     </div>
   </div>

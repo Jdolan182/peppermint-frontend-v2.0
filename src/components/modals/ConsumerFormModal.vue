@@ -1,5 +1,5 @@
 <template>
-  <Modal :model-value="modelValue" :title="consumer ? 'Edit Consumer' : 'Add Consumer'" @update:model-value="close">
+  <Modal :model-value="modelValue" :title="consumer ? `Edit ${label}` : `Add ${label}`" @update:model-value="close">
     <form @submit.prevent="submit">
       <div class="space-y-4">
         <div>
@@ -18,6 +18,10 @@
           <Label label="Confirm password" />
           <Input v-model="form.password_confirmation" type="password" :error="!!errors.password_confirmation" :error-message="errors.password_confirmation" />
         </div>
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" v-model="form.is_active" class="rounded border-gray-300 dark:border-gray-600" />
+          <span class="text-sm text-gray-700 dark:text-gray-300">Active (can log in)</span>
+        </label>
       </div>
       <div class="flex justify-end gap-3 mt-6">
         <button
@@ -32,7 +36,7 @@
           class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
           :disabled="loading"
         >
-          {{ loading ? 'Saving...' : (consumer ? 'Save changes' : 'Add consumer') }}
+          {{ loading ? 'Saving...' : (consumer ? 'Save changes' : `Add ${label.toLowerCase()}`) }}
         </button>
       </div>
     </form>
@@ -48,13 +52,14 @@ import Label from '@/components/labels/Label.vue'
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
   consumer: { type: Object, default: null },
+  label: { type: String, default: 'Consumer' },
   loading: { type: Boolean, default: false },
   errors: { type: Object, default: () => ({}) },
 })
 
 const emit = defineEmits(['update:modelValue', 'submit'])
 
-const form = ref({ name: '', email: '', password: '', password_confirmation: '' })
+const form = ref({ name: '', email: '', password: '', password_confirmation: '', is_active: true })
 
 watch(() => props.modelValue, (open) => {
   if (open) {
@@ -63,6 +68,7 @@ watch(() => props.modelValue, (open) => {
       email: props.consumer?.email ?? '',
       password: '',
       password_confirmation: '',
+      is_active: props.consumer?.is_active ?? true,
     }
   }
 })

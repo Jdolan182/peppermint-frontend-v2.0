@@ -58,6 +58,7 @@
     import Submit from '@/components/buttons/Submit.vue'
     import { createForm } from "@/composables/forms";
     import { useMaintenanceStore } from '@/store/admin/maintenance';
+    import { config } from '@/config'
 
 
     const maintenanceStore = useMaintenanceStore();
@@ -78,7 +79,7 @@
 
     const submit = async ({}) => {
 
-        if(form.value.password.value == import.meta.env.VITE_MAINTENANCE_PASSWORD){
+        if(form.value.password.value == config.maintenance.password){
             maintenanceStore.setMode(0)
             emit('updateMaintenanceMode');
         }

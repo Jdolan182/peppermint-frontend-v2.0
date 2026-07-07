@@ -1,8 +1,9 @@
 import { Cog6ToothIcon } from '@heroicons/vue/24/outline'
+import { config } from '@/config'
 
 export const SettingsRoutes = [
   {
-    path: '/' + import.meta.env.VITE_MODULE_ADMIN_NAME.toLowerCase() + '/settings',
+    path: '/' + config.admin.slug + '/settings',
     meta: {
       requiresAuth: true,
       layout: 'admin',

@@ -1,6 +1,8 @@
+import { config } from '@/config'
+
 export const RoadmapRoutes = [
   {
-    path: '/' + import.meta.env.VITE_MODULE_ADMIN_NAME.toLowerCase() + '/roadmap',
+    path: '/' + config.admin.slug + '/roadmap',
     meta: {
       requiresAuth: true,
       layout: 'admin',

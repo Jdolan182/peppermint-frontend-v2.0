@@ -1,0 +1,117 @@
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useAxios } from '@/composables/request.js'
+import { usePublicModules } from '@/composables/publicModules.js'
+import { config } from '@/config'
+
+const adminSlug = config.admin.slug
+const { siteName } = usePublicModules()
+const route = useRoute()
+
+const password = ref('')
+const passwordConfirmation = ref('')
+const loading = ref(false)
+const done = ref(false)
+const error = ref('')
+
+const token = ref('')
+const email = ref('')
+
+onMounted(() => {
+  token.value = route.query.token ?? ''
+  email.value = route.query.email ?? ''
+  if (!token.value || !email.value) {
+    error.value = 'Invalid or missing reset link.'
+  }
+})
+
+async function submit() {
+  error.value = ''
+  if (password.value !== passwordConfirmation.value) {
+    error.value = 'Passwords do not match.'
+    return
+  }
+  loading.value = true
+  try {
+    const res = await useAxios.post('/api/admin/auth/reset-password', {
+      token: token.value,
+      email: email.value,
+      password: password.value,
+      password_confirmation: passwordConfirmation.value,
+    })
+    if (res?.status === 200) {
+      done.value = true
+    } else {
+      error.value = res?.data?.message ?? 'This reset link is invalid or has expired.'
+    }
+  } catch (e) {
+    error.value = e?.response?.data?.message ?? 'Something went wrong. Please try again.'
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
+<template>
+  <div class="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 px-4 transition-colors duration-200">
+    <div class="w-full max-w-sm">
+      <div class="flex items-center gap-2 mb-8">
+        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <span class="text-white font-bold text-sm">P</span>
+        </div>
+        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ siteName }}</span>
+      </div>
+
+      <template v-if="done">
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Password updated</h1>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">Your password has been reset successfully.</p>
+        <RouterLink :to="`/${adminSlug}`" class="text-indigo-600 text-sm hover:underline">Sign in</RouterLink>
+      </template>
+
+      <template v-else>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Set a new password</h1>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Choose a strong password for your account.</p>
+
+        <form @submit.prevent="submit" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New password</label>
+            <input
+              v-model="password"
+              type="password"
+              required
+              minlength="8"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Min. 8 characters"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm password</label>
+            <input
+              v-model="passwordConfirmation"
+              type="password"
+              required
+              class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Repeat your password"
+            />
+          </div>
+
+          <p v-if="error" class="text-red-600 text-sm">{{ error }}</p>
+
+          <button
+            type="submit"
+            :disabled="loading || !token || !email"
+            class="w-full bg-indigo-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {{ loading ? 'Saving...' : 'Reset password' }}
+          </button>
+        </form>
+
+        <p class="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          <RouterLink :to="`/${adminSlug}`" class="text-indigo-600 hover:underline">Back to sign in</RouterLink>
+        </p>
+      </template>
+    </div>
+  </div>
+</template>

@@ -1,6 +1,8 @@
+import { config } from '@/config'
+
 export const TasksRoutes = [
   {
-    path: '/' + import.meta.env.VITE_MODULE_ADMIN_NAME.toLowerCase() + '/tasks',
+    path: '/' + config.admin.slug + '/tasks',
     meta: {
       requiresAuth: true,
       layout: 'admin',

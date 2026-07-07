@@ -10,7 +10,7 @@
 
     <div class="mt-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
       <div v-if="!statuses.length" class="px-6 py-10 text-center text-sm text-gray-400">No statuses yet.</div>
-      <div v-for="status in statuses" :key="status.id" class="flex items-center justify-between px-5 py-4">
+      <div v-for="status in pagedStatuses" :key="status.id" class="flex items-center justify-between px-5 py-4">
         <div class="flex items-center gap-3">
           <span class="w-3.5 h-3.5 rounded-full flex-shrink-0" :style="{ background: status.color }" />
           <span class="text-sm font-medium text-gray-900 dark:text-white">{{ status.name }}</span>
@@ -23,6 +23,8 @@
         </div>
       </div>
     </div>
+
+    <Pagination :meta="statusesMeta" class="mt-3" @change="statusesPage = $event" />
 
     <ConfirmModal
       v-model="confirmOpen"
@@ -75,11 +77,27 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
+import Pagination from '@/components/tables/Pagination.vue'
 import { useToast } from '@/composables/useToast'
 
 const toast = useToast()
 
 const statuses = ref([])
+const statusesPage = ref(1)
+const STATUSES_PER_PAGE = 10
+
+const pagedStatuses = computed(() => {
+  const start = (statusesPage.value - 1) * STATUSES_PER_PAGE
+  return statuses.value.slice(start, start + STATUSES_PER_PAGE)
+})
+
+const statusesMeta = computed(() => {
+  const total = statuses.value.length
+  const lastPage = Math.max(1, Math.ceil(total / STATUSES_PER_PAGE))
+  const from = total > 0 ? (statusesPage.value - 1) * STATUSES_PER_PAGE + 1 : 0
+  const to = Math.min(statusesPage.value * STATUSES_PER_PAGE, total)
+  return { current_page: statusesPage.value, last_page: lastPage, from, to, total }
+})
 const modalOpen = ref(false)
 const saving = ref(false)
 const editingId = ref(null)

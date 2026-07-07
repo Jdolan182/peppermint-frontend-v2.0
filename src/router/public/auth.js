@@ -8,4 +8,16 @@ export const ConsumerAuthRoutes = [
       module: 'public_login',
     },
   },
+  {
+    path: '/forgot-password',
+    name: 'ConsumerForgotPassword',
+    component: () => import('@/views/public/auth/ForgotPassword.vue'),
+    meta: { module: 'public_login' },
+  },
+  {
+    path: '/reset-password',
+    name: 'ConsumerResetPassword',
+    component: () => import('@/views/public/auth/ResetPassword.vue'),
+    meta: { module: 'public_login' },
+  },
 ]

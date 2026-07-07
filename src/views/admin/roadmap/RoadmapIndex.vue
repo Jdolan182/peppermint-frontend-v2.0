@@ -255,7 +255,7 @@
               <button
                 :disabled="idx === 0"
                 @click="moveItem(item, -1)"
-                class="p-1 rounded text-gray-300 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-20 disabled:cursor-default transition-colors"
+                class="p-1 rounded text-indigo-400 dark:text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-20 disabled:cursor-default transition-colors"
                 title="Move up"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
@@ -263,7 +263,7 @@
               <button
                 :disabled="idx === group.items.length - 1"
                 @click="moveItem(item, 1)"
-                class="p-1 rounded text-gray-300 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-20 disabled:cursor-default transition-colors"
+                class="p-1 rounded text-indigo-400 dark:text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-20 disabled:cursor-default transition-colors"
                 title="Move down"
               >
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>

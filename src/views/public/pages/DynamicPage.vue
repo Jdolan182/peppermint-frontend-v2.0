@@ -47,7 +47,6 @@ const BLOCK_MAP = {
   'bento':        defineAsyncComponent(() => import('@/components/pages/blocks/BentoBlock.vue')),
   'pricing':      defineAsyncComponent(() => import('@/components/pages/blocks/PricingBlock.vue')),
   'page-header':  defineAsyncComponent(() => import('@/components/pages/blocks/PageHeaderBlock.vue')),
-  'newsletter':   defineAsyncComponent(() => import('@/components/pages/blocks/NewsletterBlock.vue')),
   'stats':        defineAsyncComponent(() => import('@/components/pages/blocks/StatsBlock.vue')),
   'testimonials': defineAsyncComponent(() => import('@/components/pages/blocks/TestimonialsBlock.vue')),
   'contact':      defineAsyncComponent(() => import('@/components/pages/blocks/ContactBlock.vue')),

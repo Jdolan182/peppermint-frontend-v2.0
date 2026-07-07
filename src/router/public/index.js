@@ -1,20 +1,21 @@
+import { config } from '@/config'
 import { HomeRoutes } from "./home"
 import { ConsumerAuthRoutes } from "./auth"
 import { PublicBlogRoutes } from "./blogs"
 
 export function getPublicRoutes() {
-  if (import.meta.env.VITE_MODULE_PUBLIC !== 'true') return []
+  if (!config.modules.public) return []
 
   const routes = [
     ...HomeRoutes,
     ...ConsumerAuthRoutes,
   ]
 
-  if (import.meta.env.VITE_MODULE_BLOGS === 'true') {
+  if (config.modules.blogs) {
     routes.push(...PublicBlogRoutes)
   }
 
-  if (import.meta.env.VITE_MODULE_ROADMAP === 'true') {
+  if (config.modules.roadmap) {
     routes.push({
       path: '/roadmap',
       name: 'PublicRoadmap',
@@ -23,23 +24,31 @@ export function getPublicRoutes() {
     })
   }
 
-  if (import.meta.env.VITE_MODULE_TASKS === 'true') {
+  if (config.modules.tasks) {
     routes.push({
       path: '/my-tasks',
       name: 'ConsumerTasks',
       component: () => import('@/views/consumer/ConsumerTasks.vue'),
+      meta: { layout: 'public', requiresConsumerAuth: true, module: 'tasks_consumer' },
+    })
+    routes.push({
+      path: '/my-calendar',
+      name: 'ConsumerCalendar',
+      component: () => import('@/views/consumer/ConsumerCalendar.vue'),
+      meta: { layout: 'public', requiresConsumerAuth: true, module: 'tasks_consumer' },
+    })
+  }
+
+  if (config.modules.consumers) {
+    routes.push({
+      path: '/profile',
+      name: 'ConsumerProfile',
+      component: () => import('@/views/consumer/ConsumerProfile.vue'),
       meta: { layout: 'public', requiresConsumerAuth: true },
     })
   }
 
-  routes.push({
-    path: '/profile',
-    name: 'ConsumerProfile',
-    component: () => import('@/views/consumer/ConsumerProfile.vue'),
-    meta: { layout: 'public', requiresConsumerAuth: true },
-  })
-
-  if (import.meta.env.VITE_MODULE_PAGES === 'true') {
+  if (config.modules.pages) {
     routes.push({
       path: '/preview/:id',
       name: 'PagePreview',

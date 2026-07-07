@@ -75,7 +75,7 @@
               />
             </div>
             <div>
-              <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Consumer</label>
+              <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ consumerLabel }}</label>
               <SearchSelect
                 v-model="form.consumer_id"
                 :options="consumers"
@@ -85,7 +85,7 @@
           </div>
 
           <!-- Roadmap item -->
-          <div>
+          <div v-if="roadmapEnabled">
             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Linked roadmap item</label>
             <SearchSelect v-model="form.roadmap_item_id" :options="roadmapOptions" null-label="None" />
           </div>
@@ -147,14 +147,21 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watchEffect, computed } from 'vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useAxios } from '@/composables/request'
 import SearchSelect from '@/components/ui/SearchSelect.vue'
 import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 import { useToast } from '@/composables/useToast'
+import { useModulesStore } from '@/store/admin/modules'
+import { config } from '@/config'
 
 const toast = useToast()
+const modulesStore = useModulesStore()
+const consumerLabel = computed(() => modulesStore.settings.consumer_label || 'Consumer')
+const roadmapEnabled = computed(() =>
+  config.modules.roadmap && modulesStore.settings['module_roadmap'] !== 'false'
+)
 
 const props = defineProps({
   modelValue: Boolean,
@@ -190,23 +197,22 @@ const defaultForm = () => ({
 
 const form = ref(defaultForm())
 
-watch(() => props.modelValue, (open) => {
-  if (open) {
-    form.value = props.task
-      ? {
-          title: props.task.title ?? '',
-          description: props.task.description ?? '',
-          type_id: props.task.type_id,
-          status_id: props.task.status_id,
-          priority: props.task.priority ?? 'medium',
-          due_date: props.task.due_date?.slice(0, 10) ?? '',
-          assigned_admin_id: props.task.assigned_admin_id ?? null,
-          consumer_id: props.task.consumer_id ?? null,
-          roadmap_item_id: props.task.roadmap_item_id ?? null,
-          notes: props.task.notes ?? '',
-        }
-      : defaultForm()
-  }
+watchEffect(() => {
+  if (!props.modelValue) return
+  form.value = props.task?.id
+    ? {
+        title: props.task.title ?? '',
+        description: props.task.description ?? '',
+        type_id: props.task.type_id,
+        status_id: props.task.status_id,
+        priority: props.task.priority ?? 'medium',
+        due_date: props.task.due_date?.slice(0, 10) ?? '',
+        assigned_admin_id: props.task.assigned_admin?.id ?? props.task.assigned_admin_id ?? null,
+        consumer_id: props.task.consumer?.id ?? props.task.consumer_id ?? null,
+        roadmap_item_id: props.task.roadmap_item?.id ?? props.task.roadmap_item_id ?? null,
+        notes: props.task.notes ?? '',
+      }
+    : defaultForm()
 })
 
 async function handleSave() {

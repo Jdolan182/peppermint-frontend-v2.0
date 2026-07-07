@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl">
+  <div class="w-full">
     <!-- Header -->
     <div class="flex items-center justify-between mb-8">
       <div class="flex items-center gap-3">

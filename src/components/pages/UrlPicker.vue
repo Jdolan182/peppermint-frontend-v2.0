@@ -83,7 +83,15 @@ function onPageSelect(e) {
 onMounted(async () => {
   loading.value = true
   const res = await useAxios.get('/api/admin/pages')
-  pages.value = res?.data ?? []
+  pages.value = res?.data?.pages ?? []
   loading.value = false
+
+  // If the URL looks internal (starts with /) but its slug isn't a CMS page,
+  // switch to external mode so the URL is visible and editable (e.g. /blog, /roadmap)
+  if (mode.value === 'page' && props.modelValue) {
+    const slug = props.modelValue.slice(1)
+    const allSlugs = pages.value.flatMap(p => [p.slug, ...(p.children ?? []).map(c => c.slug)])
+    if (!allSlugs.includes(slug)) mode.value = 'external'
+  }
 })
 </script>

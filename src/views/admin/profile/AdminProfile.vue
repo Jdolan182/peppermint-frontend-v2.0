@@ -36,6 +36,30 @@
       </div>
     </div>
 
+    <!-- Notifications -->
+    <div class="mt-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 p-6">
+      <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-4">Notifications</h2>
+      <label class="flex items-center justify-between cursor-pointer gap-4">
+        <div>
+          <p class="text-sm text-gray-900 dark:text-white font-medium">Contact form submissions</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Receive an email when someone submits the contact form</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          :aria-checked="notifyContact"
+          @click="toggleNotifyContact"
+          class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          :class="notifyContact ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'"
+        >
+          <span
+            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200"
+            :class="notifyContact ? 'translate-x-5' : 'translate-x-0'"
+          />
+        </button>
+      </label>
+    </div>
+
     <!-- Change password -->
     <div class="mt-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 p-6 space-y-4">
       <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Change password</h2>
@@ -87,10 +111,13 @@ const pwForm = ref({ password: '', password_confirmation: '' })
 const errors = ref({})
 const savingInfo = ref(false)
 const savingPw = ref(false)
+const notifyContact = ref(false)
 
-onMounted(() => {
+onMounted(async () => {
   form.value.name  = userStore.name  ?? ''
   form.value.email = userStore.email ?? ''
+  const res = await useAxios.get('/api/admin/user')
+  notifyContact.value = res?.data?.data?.notify_contact ?? false
 })
 
 async function saveInfo() {
@@ -106,6 +133,19 @@ async function saveInfo() {
     errors.value = Object.fromEntries(Object.entries(errs).map(([k, v]) => [k, v[0]]))
   } else {
     toast.error('Failed to update profile')
+  }
+}
+
+async function toggleNotifyContact() {
+  notifyContact.value = !notifyContact.value
+  const res = await useAxios.put('/api/admin/user', {
+    name: form.value.name,
+    email: form.value.email,
+    notify_contact: notifyContact.value,
+  })
+  if (!res?.data) {
+    notifyContact.value = !notifyContact.value
+    toast.error('Failed to update notification preference')
   }
 }
 

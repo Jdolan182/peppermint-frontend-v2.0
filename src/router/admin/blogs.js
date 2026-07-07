@@ -1,4 +1,5 @@
-const base = '/' + import.meta.env.VITE_MODULE_ADMIN_NAME.toLowerCase()
+import { config } from '@/config'
+const base = '/' + config.admin.slug
 
 export const BlogRoutes = [
   {

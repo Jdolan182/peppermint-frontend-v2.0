@@ -27,7 +27,8 @@
 
 <script setup>
 import SmartLink from '@/components/pages/SmartLink.vue'
+import { config } from '@/config'
 defineProps({ data: { type: Object, default: () => ({}) } })
-const apiOrigin = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+const apiOrigin = config.apiUrl
 function resolveUrl(url) { return url?.startsWith('/') ? apiOrigin + url : url }
 </script>
