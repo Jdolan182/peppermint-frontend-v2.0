@@ -6,7 +6,7 @@
       <RouterView />
     </main>
 
-    <PublicFooter />
+    <PublicFooter v-if="footerVisible" />
   </div>
 </template>
 
@@ -14,4 +14,7 @@
 import publicHeader from "./publicHeader.vue";
 import PublicFooter from "@/components/pages/public/PublicFooter.vue";
 import { RouterView } from "vue-router";
+import { useFooterVisibility } from "@/composables/useFooterVisibility";
+
+const footerVisible = useFooterVisibility();
 </script>

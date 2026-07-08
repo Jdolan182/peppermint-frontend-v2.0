@@ -3,6 +3,10 @@ const env = import.meta.env
 export const config = {
   apiUrl: (env.VITE_API_URL ?? 'http://localhost/').replace(/\/$/, ''),
 
+  // Shows the "Try the demo" credentials box on the consumer login page.
+  // Only enable on the demo/sales site — never on a customer install.
+  demoMode: env.VITE_DEMO_MODE === 'true',
+
   admin: {
     name:          env.VITE_MODULE_ADMIN_NAME ?? 'Peppermint',
     slug:          (env.VITE_MODULE_ADMIN_NAME ?? 'peppermint').toLowerCase(),

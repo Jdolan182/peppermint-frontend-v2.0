@@ -12,7 +12,6 @@
       :is="blockComponent(section.type)"
       :data="section.data ?? {}"
     />
-    <PublicFooter v-if="page.show_footer" />
   </div>
 
   <div v-else-if="loading" class="flex min-h-screen items-center justify-center">
@@ -25,10 +24,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineAsyncComponent } from 'vue'
+import { ref, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAxios } from '@/composables/request'
-import PublicFooter from '@/components/pages/public/PublicFooter.vue'
+import { useFooterVisibility } from '@/composables/useFooterVisibility'
+
+const footerVisible = useFooterVisibility()
+onUnmounted(() => { footerVisible.value = true })
 
 const BLOCK_MAP = {
   'hero':         defineAsyncComponent(() => import('@/components/pages/blocks/HeroBlock.vue')),
@@ -66,5 +68,6 @@ onMounted(async () => {
     page.value = null
   }
   loading.value = false
+  footerVisible.value = page.value ? page.value.show_footer !== false : true
 })
 </script>

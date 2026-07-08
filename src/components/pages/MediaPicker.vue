@@ -28,18 +28,23 @@
             <div v-if="loadingMedia" class="text-sm text-gray-400">Loading…</div>
             <div v-else-if="!media.length" class="text-sm text-gray-400 text-center py-8">No media uploaded yet.</div>
             <div v-else class="grid grid-cols-4 gap-3">
-              <button
+              <div
                 v-for="item in media"
                 :key="item.id"
                 @click="select(item.url)"
-                class="relative aspect-square rounded-lg overflow-hidden ring-2 transition-all"
-                :class="selected === item.url ? 'ring-indigo-600' : 'ring-transparent hover:ring-gray-300'"
+                class="group relative aspect-square rounded-lg overflow-hidden ring-2 transition-all cursor-pointer"
+                :class="selected === storageUrl(item.url) ? 'ring-indigo-600' : 'ring-transparent hover:ring-gray-300'"
               >
                 <img :src="storageUrl(item.url)" :alt="item.alt || item.filename" class="w-full h-full object-cover" />
-                <div v-if="selected === item.url" class="absolute inset-0 bg-indigo-600/20 flex items-center justify-center">
+                <div v-if="selected === storageUrl(item.url)" class="absolute inset-0 bg-indigo-600/20 flex items-center justify-center pointer-events-none">
                   <span class="text-white text-lg">✓</span>
                 </div>
-              </button>
+                <button
+                  @click.stop="askDelete(item)"
+                  class="absolute top-1 right-1 hidden group-hover:flex items-center justify-center w-6 h-6 rounded-full bg-black/60 text-white text-xs hover:bg-red-600 transition-colors"
+                  title="Delete from gallery"
+                >✕</button>
+              </div>
             </div>
           </div>
 
@@ -94,12 +99,21 @@
       </div>
     </div>
   </Teleport>
+
+  <ConfirmModal
+    v-model="confirmDeleteOpen"
+    title="Delete image"
+    :message="deletingItem ? `Delete '${deletingItem.filename}' from the gallery? Pages using this image will show a broken image.` : ''"
+    :loading="deletingLoading"
+    @confirm="doDelete"
+  />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useAxios } from '@/composables/request'
 import { config } from '@/config'
+import ConfirmModal from '@/components/modals/ConfirmModal.vue'
 
 // The backend returns an absolute URL based on APP_URL, which may not match
 // the actual host the frontend is talking to. Extract just the path and
@@ -132,6 +146,27 @@ async function loadMedia() {
 
 function select(url) {
   selected.value = storageUrl(url)
+}
+
+const confirmDeleteOpen = ref(false)
+const deletingItem = ref(null)
+const deletingLoading = ref(false)
+
+function askDelete(item) {
+  deletingItem.value = item
+  confirmDeleteOpen.value = true
+}
+
+async function doDelete() {
+  deletingLoading.value = true
+  const res = await useAxios.delete(`/api/admin/media/${deletingItem.value.id}`)
+  deletingLoading.value = false
+  confirmDeleteOpen.value = false
+  if (res?.status === 200) {
+    media.value = media.value.filter(m => m.id !== deletingItem.value.id)
+    if (selected.value === storageUrl(deletingItem.value.url)) selected.value = null
+  }
+  deletingItem.value = null
 }
 
 function confirm() {

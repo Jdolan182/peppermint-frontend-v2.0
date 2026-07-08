@@ -6,8 +6,6 @@
       :is="blockComponent(section.type)"
       :data="section.data ?? {}"
     />
-
-    <PublicFooter v-if="page.show_footer" />
   </div>
 
   <div v-else-if="notFound" class="min-h-screen flex items-center justify-center">
@@ -20,10 +18,13 @@
 </template>
 
 <script setup>
-import { ref, watch, defineAsyncComponent } from 'vue'
+import { ref, watch, onUnmounted, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAxios } from '@/composables/request'
-import PublicFooter from '@/components/pages/public/PublicFooter.vue'
+import { useFooterVisibility } from '@/composables/useFooterVisibility'
+
+const footerVisible = useFooterVisibility()
+onUnmounted(() => { footerVisible.value = true })
 
 function applyMeta(page) {
   document.title = page?.meta_title || page?.title || ''
@@ -71,6 +72,7 @@ async function load(slug) {
   } catch {
     notFound.value = true
   }
+  footerVisible.value = page.value ? page.value.show_footer !== false : true
 }
 
 watch(() => route.params.slug, (slug) => { if (slug) load(slug) }, { immediate: true })

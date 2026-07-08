@@ -7,7 +7,6 @@
       :is="blockComponent(section.type)"
       :data="section.data ?? {}"
     />
-    <PublicFooter v-if="cmsPage.show_footer" />
   </div>
 
   <!-- Fallback to static home -->
@@ -15,10 +14,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineAsyncComponent } from 'vue'
+import { ref, onMounted, onUnmounted, defineAsyncComponent } from 'vue'
 import { useAxios } from '@/composables/request'
 import HomeView from '@/views/public/HomeView.vue'
-import PublicFooter from '@/components/pages/public/PublicFooter.vue'
+import { useFooterVisibility } from '@/composables/useFooterVisibility'
+
+const footerVisible = useFooterVisibility()
+onUnmounted(() => { footerVisible.value = true })
 
 const BLOCK_MAP = {
   'hero':         defineAsyncComponent(() => import('@/components/pages/blocks/HeroBlock.vue')),
@@ -47,6 +49,7 @@ onMounted(async () => {
   const res = await useAxios.get('/api/public/pages/home')
   cmsPage.value = res?.data ?? null
   loading.value = false
+  footerVisible.value = cmsPage.value ? cmsPage.value.show_footer !== false : true
   if (cmsPage.value) {
     document.title = cmsPage.value.meta_title || cmsPage.value.title || ''
     let metaDesc = document.querySelector('meta[name="description"]')

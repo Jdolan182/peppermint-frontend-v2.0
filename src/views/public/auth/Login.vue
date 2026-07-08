@@ -4,6 +4,7 @@ import { useAxios } from '@/composables/request.js'
 import { useConsumerUserStore } from '@/store/consumer/user'
 import { useRouter } from 'vue-router'
 import { usePublicModules } from '@/composables/publicModules.js'
+import { config } from '@/config'
 
 const { siteName } = usePublicModules()
 
@@ -73,7 +74,7 @@ const login = async ({ params, form }) => {
           <RouterLink to="/forgot-password" class="text-emerald-600 hover:underline">Forgot password?</RouterLink>
         </p>
 
-        <div class="mt-6 rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 text-sm text-gray-600">
+        <div v-if="config.demoMode" class="mt-6 rounded-lg bg-gray-50 border border-gray-200 px-4 py-3 text-sm text-gray-600">
           <p class="font-medium text-gray-700 mb-1">Try the demo</p>
           <p>Email: <span class="font-mono text-gray-900">demo@example.com</span></p>
           <p>Password: <span class="font-mono text-gray-900">password</span></p>
