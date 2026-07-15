@@ -1,9 +1,9 @@
 <template>
   <div class="w-full max-w-sm">
-    <h2 class="text-2xl font-bold tracking-tight text-gray-900">{{ title }}</h2>
-    <p class="mt-2 text-sm text-gray-500">Sign in to continue</p>
+    <h2 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{ title }}</h2>
+    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Sign in to continue</p>
 
-    <div v-if="form.login.error" class="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+    <div v-if="form.login.error" class="mt-4 rounded-lg bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
       {{ form.login.errorMessage }}
     </div>
 

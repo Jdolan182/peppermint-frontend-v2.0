@@ -1,12 +1,12 @@
 <template>
-  <section class="py-20 px-6 bg-gray-50 dark:bg-gray-800/50">
+  <section class="py-20 px-6 bg-gray-50 dark:bg-gray-800">
     <div class="max-w-5xl mx-auto">
       <h2 v-if="data.heading" class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-12">{{ data.heading }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           v-for="(plan, i) in (data.plans ?? [])"
           :key="i"
-          class="rounded-2xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 p-8 flex flex-col"
+          class="rounded-2xl bg-white dark:bg-gray-900 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 p-8 flex flex-col"
         >
           <div>
             <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ plan.name }}</h3>
@@ -19,7 +19,7 @@
             <li
               v-for="(feature, j) in parseFeatures(plan.features)"
               :key="j"
-              class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300"
+              class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-200"
             >
               <span class="text-green-500 flex-shrink-0">✓</span>
               {{ feature }}
@@ -28,7 +28,7 @@
           <SmartLink
             v-if="plan.cta"
             :href="plan.cta_url || '#'"
-            class="mt-8 block rounded-xl bg-indigo-600 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+            class="mt-8 block rounded-xl bg-emerald-600 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-emerald-500 transition-colors"
           >{{ plan.cta }}</SmartLink>
         </div>
       </div>

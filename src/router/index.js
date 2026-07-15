@@ -94,4 +94,49 @@ router.beforeEach(async (to) => {
   }
 })
 
+// --- Document titles -------------------------------------------------------
+// CMS pages (Home/DynamicPage/PagePreview) fetch their content and set their
+// own meta titles; everything else gets a title here so it never shows the
+// previous page's leftover.
+const CMS_TITLED = new Set(['Home', 'DynamicPage', 'PagePreview'])
+
+const ROUTE_TITLES = {
+  PublicBlogs:            'Blog',
+  PublicBlogPost:         'Blog',
+  PublicRoadmap:          'Roadmap',
+  ConsumerLogin:          'Sign in',
+  ConsumerForgotPassword: 'Forgot password',
+  ConsumerResetPassword:  'Reset password',
+  ConsumerTasks:          'My tasks',
+  ConsumerCalendar:       'Calendar',
+  ConsumerProfile:        'Profile',
+  Maintenance:            'Down for maintenance',
+  Peppermint:             'Sign in',
+  AdminForgotPassword:    'Forgot password',
+  AdminResetPassword:     'Reset password',
+  AdminProfile:           'Profile',
+  AdminUsers:             'Team',
+  TaskTypes:              'Task types',
+  TaskStatuses:           'Task statuses',
+  BlogCreate:             'New blog post',
+  BlogEdit:               'Edit blog post',
+  BlogCategories:         'Blog categories',
+  RoadmapCategories:      'Roadmap categories',
+  PageEditor:             'Page editor',
+  FooterEditor:           'Footer editor',
+  ContactSubmissions:     'Contact submissions',
+}
+
+router.afterEach((to) => {
+  if (CMS_TITLED.has(to.name)) return
+
+  const { siteName } = usePublicModules()
+  // Admin screens brand as the panel; public screens brand as the site
+  const base = to.meta.requiresAuth ? config.admin.name : (siteName.value || config.admin.name)
+  const label = ROUTE_TITLES[to.name]
+    ?? (typeof to.name === 'string' ? to.name.replace(/([a-z])([A-Z])/g, '$1 $2') : '')
+
+  document.title = label && label !== base ? `${label} · ${base}` : base
+})
+
 export default router

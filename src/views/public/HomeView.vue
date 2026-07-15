@@ -1,15 +1,15 @@
 <template>
   <div class="w-full">
     <!-- Hero: full-width gradient background, centered content -->
-    <section class="w-full bg-gradient-to-b from-indigo-50 to-white">
+    <section class="w-full bg-gradient-to-b from-emerald-50 to-white">
       <div class="mx-auto max-w-screen-2xl px-8 lg:px-16 py-24 lg:py-32">
         <div class="text-center max-w-3xl mx-auto">
-          <span class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-4 py-1.5 text-sm font-medium text-indigo-700 ring-1 ring-inset ring-indigo-200">
+          <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 ring-1 ring-inset ring-emerald-200">
             Now on Laravel 13 + Vue 3
           </span>
           <h1 class="mt-6 text-5xl font-bold tracking-tight text-gray-900 lg:text-6xl">
             Content management
-            <span class="text-indigo-600"> made simple</span>
+            <span class="text-emerald-600"> made simple</span>
           </h1>
           <p class="mt-6 text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
             {{ siteName }} is a modern CMS built for teams who move fast. Manage your content, users, and pages from one clean interface.
@@ -18,7 +18,7 @@
             <router-link
               v-if="publicLoginEnabled"
               :to="{ name: 'ConsumerLogin' }"
-              class="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+              class="rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 transition-colors"
             >
               Get started
             </router-link>
@@ -38,9 +38,9 @@
               peppermint.app/admin
             </div>
           </div>
-          <div class="h-64 bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+          <div class="h-64 bg-gradient-to-br from-emerald-50 via-white to-purple-50 flex items-center justify-center">
             <div class="text-center">
-              <div class="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+              <div class="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
                 <span class="text-white font-bold text-2xl">P</span>
               </div>
               <p class="mt-4 text-gray-400 text-sm">Your admin dashboard</p>
@@ -58,8 +58,8 @@
           <p class="mt-4 text-gray-500">Built on a solid foundation so you can focus on your content, not your infrastructure.</p>
         </div>
         <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          <div v-for="feature in features" :key="feature.title" class="rounded-2xl bg-gray-50 p-8 hover:bg-indigo-50 transition-colors group">
-            <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center group-hover:bg-indigo-700 transition-colors">
+          <div v-for="feature in features" :key="feature.title" class="rounded-2xl bg-gray-50 p-8 hover:bg-emerald-50 transition-colors group">
+            <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center group-hover:bg-emerald-700 transition-colors">
               <component :is="feature.icon" class="w-5 h-5 text-white" />
             </div>
             <h3 class="mt-4 text-base font-semibold text-gray-900">{{ feature.title }}</h3>
@@ -72,13 +72,13 @@
     <!-- CTA: full-width gray background -->
     <section class="w-full bg-gray-50 py-16">
       <div class="mx-auto max-w-screen-2xl px-8 lg:px-16">
-        <div class="bg-indigo-600 rounded-3xl px-8 py-16 text-center">
+        <div class="bg-emerald-600 rounded-3xl px-8 py-16 text-center">
           <h2 class="text-3xl font-bold text-white">Ready to get started?</h2>
-          <p class="mt-4 text-indigo-200">Join and start managing your content today.</p>
+          <p class="mt-4 text-emerald-200">Join and start managing your content today.</p>
           <router-link
             v-if="publicLoginEnabled"
             :to="{ name: 'ConsumerLogin' }"
-            class="mt-8 inline-flex items-center rounded-lg bg-white px-6 py-3 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-50 transition-colors"
+            class="mt-8 inline-flex items-center rounded-lg bg-white px-6 py-3 text-sm font-semibold text-emerald-600 shadow-sm hover:bg-emerald-50 transition-colors"
           >
             Sign in now
           </router-link>

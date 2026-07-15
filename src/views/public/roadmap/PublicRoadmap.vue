@@ -53,7 +53,7 @@
             {{ meta.label }}
           </span>
           <span class="ml-auto flex items-center gap-1.5 text-xs text-gray-400">
-            <span class="inline-block w-px h-3 bg-indigo-400" />
+            <span class="inline-block w-px h-3 bg-emerald-400" />
             Today
           </span>
         </div>
@@ -75,7 +75,7 @@
                   class="px-2 py-3 text-center text-xs font-semibold border-r border-gray-100 dark:border-gray-800 last:border-r-0 whitespace-nowrap"
                   style="width:140px; min-width:140px"
                   :class="m.isCurrentMonth
-                    ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 dark:text-indigo-400'
+                    ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500 dark:text-emerald-400'
                     : 'bg-gray-50 dark:bg-gray-900 text-gray-400'"
                 >{{ m.label }}</th>
               </tr>
@@ -99,7 +99,7 @@
                     class="relative border-r border-gray-100 dark:border-gray-800 last:border-r-0 bg-gray-50 dark:bg-gray-900 overflow-hidden"
                     style="width:140px; min-width:140px"
                   >
-                    <div v-if="m.isCurrentMonth" class="absolute inset-y-0 w-px bg-indigo-400/40 pointer-events-none" :style="{ left: m.todayPercent + '%' }" />
+                    <div v-if="m.isCurrentMonth" class="absolute inset-y-0 w-px bg-emerald-400/40 pointer-events-none" :style="{ left: m.todayPercent + '%' }" />
                   </td>
                 </tr>
 
@@ -124,9 +124,9 @@
                     :key="m.key"
                     class="relative border-r border-gray-100 dark:border-gray-800 last:border-r-0 p-0 overflow-hidden"
                     style="width:140px; min-width:140px; height:46px"
-                    :class="m.isCurrentMonth ? 'bg-indigo-50/30 dark:bg-indigo-900/10' : ''"
+                    :class="m.isCurrentMonth ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : ''"
                   >
-                    <div v-if="m.isCurrentMonth" class="absolute inset-y-0 w-px bg-indigo-400/50 z-0 pointer-events-none" :style="{ left: m.todayPercent + '%' }" />
+                    <div v-if="m.isCurrentMonth" class="absolute inset-y-0 w-px bg-emerald-400/50 z-0 pointer-events-none" :style="{ left: m.todayPercent + '%' }" />
 
                     <div
                       v-if="barSegment(item, m)"
@@ -281,7 +281,9 @@ function formatShortDate(d) {
 const today    = new Date()
 const loading  = ref(true)
 const items    = ref([])
-const view     = ref('timeline')
+// The month-grid timeline needs horizontal room — phones get the card list
+// by default (the toggle still offers the timeline if wanted)
+const view     = ref(window.matchMedia('(max-width: 767px)').matches ? 'list' : 'timeline')
 const activeTab = ref('')
 const ganttScroll  = ref(null)
 let   currentMonthEl = null

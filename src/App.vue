@@ -5,12 +5,24 @@ import adminLayout from "./layouts/admin/adminLayout.vue";
 import publicLayout from "./layouts/public/publicLayout.vue";
 import Banner from "@/components/banners/Banner.vue";
 import ToastContainer from "@/components/ui/ToastContainer.vue";
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, watch } from "vue";
 import { useThemeStore } from "@/store/theme";
+import { usePublicModules } from "@/composables/publicModules";
+import { setLetterFavicon, BRAND_PUBLIC, BRAND_ADMIN } from "@/utils/favicon";
 
 const route = useRoute();
 
 const themeStore = useThemeStore()
+
+// Tab icon: letter-mark from the site name (updates when settings load).
+// Brand colour follows the surface — emerald on the public site, indigo
+// in the admin panel.
+const { siteName } = usePublicModules()
+watch(
+  [siteName, () => route.meta.layout],
+  ([name, layout]) => setLetterFavicon(name, layout === 'admin' ? BRAND_ADMIN : BRAND_PUBLIC),
+  { immediate: true }
+)
 
 const systemMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 const onSystemChange = () => {

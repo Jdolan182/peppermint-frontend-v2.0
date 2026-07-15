@@ -49,16 +49,17 @@
         <div
           v-for="(cell, i) in calendarCells"
           :key="i"
-          class="min-h-[110px] border-b border-r border-gray-100 dark:border-gray-700 p-2 group/cell cursor-pointer"
+          class="min-h-[64px] md:min-h-[110px] border-b border-r border-gray-100 dark:border-gray-700 p-1.5 md:p-2 group/cell cursor-pointer"
           :class="[
             cell.isCurrentMonth ? '' : 'bg-gray-50/60 dark:bg-gray-900/40',
             i % 7 === 6 ? 'border-r-0' : '',
+            isSelectedDay(cell.date) ? 'ring-2 ring-inset ring-indigo-400 rounded-lg' : '',
           ]"
-          @click.self="openNewTask(cell.date)"
+          @click="onCellClick(cell, $event)"
         >
-          <!-- Day number — click to switch to day view -->
+          <!-- Day number — desktop: switch to day view; mobile: select for agenda -->
           <button
-            @click="switchToDay(cell.date)"
+            @click.stop="onDayNumberClick(cell.date)"
             class="inline-flex w-6 h-6 items-center justify-center rounded-full text-xs font-semibold mb-1 transition-colors"
             :class="[
               cell.isToday
@@ -68,7 +69,19 @@
             ]"
           >{{ cell.day }}</button>
 
-          <div class="space-y-0.5">
+          <!-- Mobile: event dots -->
+          <div v-if="isMobile" class="flex flex-wrap items-center gap-1 px-0.5">
+            <span
+              v-for="event in cell.events.slice(0, 4)"
+              :key="event._key"
+              class="w-1.5 h-1.5 rounded-full"
+              :style="{ background: event._color }"
+            />
+            <span v-if="cell.events.length > 4" class="text-[10px] leading-none text-gray-400">+{{ cell.events.length - 4 }}</span>
+          </div>
+
+          <!-- Desktop: event chips -->
+          <div v-else class="space-y-0.5">
             <button
               v-for="event in cell.events"
               :key="event._key"
@@ -79,6 +92,30 @@
             >{{ event.title }}</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Mobile agenda for the selected day (month view only) -->
+    <div v-if="view === 'month' && isMobile" class="mt-4">
+      <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 px-1 mb-2">
+        {{ dayLabel }}
+      </p>
+      <div v-if="!dayEvents.length" class="rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 px-4 py-6 text-center">
+        <p class="text-xs text-gray-400">Nothing scheduled this day.</p>
+      </div>
+      <div v-else class="space-y-2">
+        <button
+          v-for="event in dayEvents"
+          :key="event._key"
+          @click="openEventModal(event)"
+          class="w-full flex items-center gap-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 px-4 py-3 text-left"
+        >
+          <span class="w-1 self-stretch rounded-full flex-shrink-0" :style="{ background: event._color }" />
+          <span class="flex-1 min-w-0">
+            <span class="block text-sm font-medium text-gray-900 dark:text-white truncate">{{ event.title }}</span>
+            <span class="block text-xs text-gray-400">{{ event._typeLabel }}<template v-if="event._status"> · {{ event._status }}</template></span>
+          </span>
+        </button>
       </div>
     </div>
 
@@ -244,6 +281,9 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const today = new Date()
 
 // ── View state ────────────────────────────────────────────────────────────────
+// On phones the month cells are too narrow for event text — cells show dots
+// and tapping a day lists its events in an agenda under the grid.
+const isMobile = window.matchMedia('(max-width: 767px)').matches
 const view = ref('month')
 const currentYear  = ref(today.getFullYear())
 const currentMonth = ref(today.getMonth())
@@ -316,6 +356,27 @@ function nextDay() {
   d.setDate(d.getDate() + 1)
   switchToDay(d)
 }
+
+function onCellClick(cell, event) {
+  if (isMobile) {
+    // Mobile: tapping a day selects it for the agenda below the grid
+    selectedDay.value = new Date(cell.date)
+    return
+  }
+  // Desktop: clicking empty cell space starts a new task on that date
+  if (event.target === event.currentTarget) openNewTask(cell.date)
+}
+
+function onDayNumberClick(date) {
+  if (isMobile) {
+    selectedDay.value = new Date(date)
+    return
+  }
+  switchToDay(date)
+}
+
+const isSelectedDay = (date) =>
+  isMobile && date.toDateString() === selectedDay.value.toDateString()
 
 function switchToDay(date) {
   selectedDay.value = new Date(date)

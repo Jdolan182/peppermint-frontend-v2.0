@@ -363,7 +363,8 @@ import RoadmapItemDrawer from '@/components/tasks/RoadmapItemDrawer.vue'
 
 const today = new Date()
 
-const view = ref('timeline')
+// Timeline needs horizontal room — phones lead with the list view
+const view = ref(window.matchMedia('(max-width: 767px)').matches ? 'list' : 'timeline')
 const loading = ref(true)
 const items = ref([])
 const admins = ref([])

@@ -231,7 +231,8 @@ const toast = useToast()
 
 const userStore = useUserStore()
 
-const view = ref('kanban')
+// Kanban drag-and-drop is a desktop interaction — phones lead with the list
+const view = ref(window.matchMedia('(max-width: 767px)').matches ? 'list' : 'kanban')
 const loading = ref(true)
 const tasks = ref([])
 const types = ref([])

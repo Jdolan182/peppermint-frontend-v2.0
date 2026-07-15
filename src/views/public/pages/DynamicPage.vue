@@ -12,7 +12,7 @@
     <div class="text-center">
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white">404</h1>
       <p class="mt-2 text-gray-500">Page not found</p>
-      <router-link :to="{ name: 'Home' }" class="mt-4 inline-block text-indigo-600 hover:underline text-sm">Go home</router-link>
+      <router-link :to="{ name: 'Home' }" class="mt-4 inline-block text-emerald-600 hover:underline text-sm">Go home</router-link>
     </div>
   </div>
 </template>
@@ -22,6 +22,9 @@ import { ref, watch, onUnmounted, defineAsyncComponent } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAxios } from '@/composables/request'
 import { useFooterVisibility } from '@/composables/useFooterVisibility'
+import { usePublicModules } from '@/composables/publicModules'
+
+const { siteName } = usePublicModules()
 
 const footerVisible = useFooterVisibility()
 onUnmounted(() => { footerVisible.value = true })
@@ -72,6 +75,7 @@ async function load(slug) {
   } catch {
     notFound.value = true
   }
+  if (notFound.value) document.title = `Page not found · ${siteName.value}`
   footerVisible.value = page.value ? page.value.show_footer !== false : true
 }
 

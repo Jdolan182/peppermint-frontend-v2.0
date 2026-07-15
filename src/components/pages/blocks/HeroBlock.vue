@@ -9,7 +9,7 @@
           <SmartLink
             v-if="data.cta_primary_label"
             :href="data.cta_primary_url || '#'"
-            class="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+            class="rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-500 transition-colors"
           >{{ data.cta_primary_label }}</SmartLink>
           <SmartLink
             v-if="data.cta_secondary_label"

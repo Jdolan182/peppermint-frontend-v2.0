@@ -1,5 +1,5 @@
 <template>
-  <div v-if="page" class="flex gap-6 h-full min-h-0">
+  <div v-if="page" class="flex flex-col lg:flex-row gap-6 h-full min-h-0">
 
     <!-- Sections (main) -->
     <div class="flex-1 min-w-0 space-y-4">
@@ -86,8 +86,8 @@
       </div>
     </div>
 
-    <!-- Settings sidebar -->
-    <div class="w-72 flex-shrink-0 space-y-4">
+    <!-- Settings sidebar (stacks above the blocks on mobile) -->
+    <div class="w-full lg:w-72 flex-shrink-0 space-y-4 order-first lg:order-none">
       <div class="rounded-xl bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 p-5 space-y-4">
         <h2 class="text-sm font-semibold text-gray-900 dark:text-white">Page settings</h2>
 

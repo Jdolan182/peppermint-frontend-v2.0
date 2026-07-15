@@ -1,13 +1,13 @@
 <template>
-  <div class="w-full min-h-screen bg-gray-50">
+  <div class="w-full min-h-screen bg-gray-50 dark:bg-gray-950">
     <!-- Loading -->
     <template v-if="loading">
-      <div class="h-64 bg-gray-200 animate-pulse" />
+      <div class="h-64 bg-gray-200 dark:bg-gray-800 animate-pulse" />
       <div class="mx-auto max-w-3xl px-6 lg:px-10 py-12 space-y-5 animate-pulse">
-        <div class="h-4 bg-gray-200 rounded w-1/3" />
-        <div class="h-4 bg-gray-200 rounded w-1/2" />
+        <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/3" />
+        <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2" />
         <div class="space-y-3 mt-10">
-          <div v-for="n in 10" :key="n" class="h-4 bg-gray-200 rounded" :style="{ width: n % 4 === 0 ? '75%' : '100%' }" />
+          <div v-for="n in 10" :key="n" class="h-4 bg-gray-200 dark:bg-gray-800 rounded" :style="{ width: n % 4 === 0 ? '75%' : '100%' }" />
         </div>
       </div>
     </template>
@@ -15,9 +15,9 @@
     <!-- Not found -->
     <div v-else-if="!post" class="flex items-center justify-center min-h-[60vh]">
       <div class="text-center">
-        <p class="text-6xl font-bold text-gray-200 mb-4">404</p>
-        <p class="text-gray-500 text-lg mb-6">Post not found.</p>
-        <router-link :to="{ name: 'PublicBlogs' }" class="text-indigo-600 hover:text-indigo-500 font-medium">
+        <p class="text-6xl font-bold text-gray-200 dark:text-gray-700 mb-4">404</p>
+        <p class="text-gray-500 dark:text-gray-400 text-lg mb-6">Post not found.</p>
+        <router-link :to="{ name: 'PublicBlogs' }" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 font-medium">
           ← Back to blog
         </router-link>
       </div>
@@ -45,22 +45,22 @@
       <!-- Body -->
       <div class="mx-auto max-w-3xl px-6 lg:px-10">
         <!-- Meta strip -->
-        <div class="flex items-center gap-6 text-sm text-gray-500 py-5 border-b border-gray-200 mb-10">
+        <div class="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400 py-5 border-b border-gray-200 dark:border-gray-800 mb-10">
           <router-link
             :to="{ name: 'PublicBlogs' }"
-            class="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-700 transition-colors"
+            class="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             All posts
           </router-link>
-          <span v-if="post.author?.name" class="font-medium text-gray-700">{{ post.author.name }}</span>
+          <span v-if="post.author?.name" class="font-medium text-gray-700 dark:text-gray-300">{{ post.author.name }}</span>
           <span>{{ formatDate(post.published_at) }}</span>
         </div>
 
         <!-- Excerpt lead -->
-        <p v-if="post.excerpt" class="text-xl text-gray-600 leading-relaxed mb-10 font-medium border-l-4 border-indigo-400 pl-5">
+        <p v-if="post.excerpt" class="text-xl text-gray-600 dark:text-gray-300 leading-relaxed mb-10 font-medium border-l-4 border-emerald-400 pl-5">
           {{ post.excerpt }}
         </p>
 
@@ -82,7 +82,7 @@ const post = ref(null)
 const loading = ref(true)
 
 function colorToGradient(hex) {
-  if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return 'linear-gradient(135deg, #a5b4fc 0%, #6366f1 100%)'
+  if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) return 'linear-gradient(135deg, #6ee7b7 0%, #10b981 100%)'
   const num = parseInt(hex.replace('#', ''), 16)
   const r = (num >> 16) & 0xff
   const g = (num >> 8) & 0xff
@@ -142,12 +142,12 @@ onMounted(async () => {
 .blog-content :deep(li::marker) { color: #6b7280; }
 
 .blog-content :deep(blockquote) {
-  border-left: 4px solid #c7d2fe;
-  background: #eef2ff;
+  border-left: 4px solid #a7f3d0;
+  background: #ecfdf5;
   margin: 2em 0;
   padding: 1em 1.5em;
   border-radius: 0 8px 8px 0;
-  color: #4338ca;
+  color: #047857;
   font-style: italic;
   font-size: 1.05rem;
 }
@@ -163,15 +163,15 @@ onMounted(async () => {
 .blog-content :deep(em) { font-style: italic; }
 
 .blog-content :deep(a) {
-  color: #4f46e5;
+  color: #059669;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.blog-content :deep(a:hover) { color: #3730a3; }
+.blog-content :deep(a:hover) { color: #065f46; }
 
 .blog-content :deep(code) {
   background: #f3f4f6;
-  color: #4f46e5;
+  color: #059669;
   padding: 0.15em 0.4em;
   border-radius: 5px;
   font-size: 0.875em;
@@ -194,5 +194,36 @@ onMounted(async () => {
   color: inherit;
   padding: 0;
   font-size: inherit;
+}
+
+/* ── Dark mode (html.dark is applied by the theme store) ─────────────── */
+.dark .blog-content {
+  color: #d1d5db; /* gray-300 */
+}
+
+.dark .blog-content :deep(h1),
+.dark .blog-content :deep(h2),
+.dark .blog-content :deep(h3),
+.dark .blog-content :deep(h4),
+.dark .blog-content :deep(strong) {
+  color: #f9fafb; /* gray-50 */
+}
+
+.dark .blog-content :deep(li::marker) { color: #9ca3af; }
+
+.dark .blog-content :deep(blockquote) {
+  border-left-color: #047857;
+  background: rgba(4, 120, 87, 0.15);
+  color: #6ee7b7;
+}
+
+.dark .blog-content :deep(hr) { border-top-color: #374151; }
+
+.dark .blog-content :deep(a) { color: #34d399; }
+.dark .blog-content :deep(a:hover) { color: #6ee7b7; }
+
+.dark .blog-content :deep(code) {
+  background: #1f2937;
+  color: #6ee7b7;
 }
 </style>

@@ -53,45 +53,45 @@ async function submit() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-white px-4">
+  <div class="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 px-4">
     <div class="w-full max-w-sm">
-      <div class="flex items-center gap-2 mb-8">
+      <RouterLink to="/" class="flex items-center gap-2 mb-8 w-fit">
         <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-          <span class="text-white font-bold text-sm">P</span>
+          <span class="text-white font-bold text-sm">{{ siteName[0]?.toUpperCase() }}</span>
         </div>
-        <span class="text-xl font-bold text-gray-900">{{ siteName }}</span>
-      </div>
+        <span class="text-xl font-bold text-gray-900 dark:text-white">{{ siteName }}</span>
+      </RouterLink>
 
       <template v-if="done">
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">Password updated</h1>
-        <p class="text-gray-500 mb-6">Your password has been reset successfully.</p>
-        <RouterLink to="/login" class="text-emerald-600 text-sm hover:underline">Sign in</RouterLink>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Password updated</h1>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">Your password has been reset successfully.</p>
+        <RouterLink to="/login" class="text-emerald-600 dark:text-emerald-400 text-sm hover:underline">Sign in</RouterLink>
       </template>
 
       <template v-else>
-        <h1 class="text-2xl font-bold text-gray-900 mb-1">Set a new password</h1>
-        <p class="text-gray-500 text-sm mb-6">Choose a strong password for your account.</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Set a new password</h1>
+        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">Choose a strong password for your account.</p>
 
         <form @submit.prevent="submit" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">New password</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">New password</label>
             <input
               v-model="password"
               type="password"
               required
               minlength="8"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              class="w-full border border-gray-300 dark:border-gray-600 dark:bg-white/5 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               placeholder="Min. 8 characters"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Confirm password</label>
             <input
               v-model="passwordConfirmation"
               type="password"
               required
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              class="w-full border border-gray-300 dark:border-gray-600 dark:bg-white/5 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
               placeholder="Repeat your password"
             />
           </div>

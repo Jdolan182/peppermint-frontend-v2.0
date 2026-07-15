@@ -12,7 +12,14 @@ import { config } from '@/config'
 axios.defaults.baseURL = config.apiUrl + '/';
 axios.defaults.withCredentials = true
 axios.defaults.withXSRFToken = true
-axios.defaults.headers.common['Access-Control-Allow-Origin', '*#']
+
+// After a deploy, an open tab still references the previous build's hashed
+// chunk files, which no longer exist — lazy-loaded routes then fail silently
+// (nav clicks appear dead). Reload once to pick up the new build.
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault()
+  window.location.reload()
+})
 
 const peppermint = createApp(App)
 

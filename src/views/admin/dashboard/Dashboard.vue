@@ -1,5 +1,28 @@
 <template>
   <div class="space-y-8">
+    <!-- Stats -->
+    <div v-if="modulesStore.isEnabled('tasks') || modulesStore.isEnabled('roadmap')">
+      <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Overview</h2>
+      <dl v-if="statsLoading" class="grid grid-cols-2 gap-4 sm:grid-cols-5">
+        <div v-for="i in 5" :key="i" class="h-24 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+      </dl>
+      <dl v-else class="grid grid-cols-2 gap-4 sm:grid-cols-5">
+        <div
+          v-for="item in visibleStats"
+          :key="item.label"
+          class="overflow-hidden rounded-xl bg-white dark:bg-gray-800 px-5 py-5 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700"
+        >
+          <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">{{ item.label }}</dt>
+          <dd
+            class="mt-1 text-3xl font-semibold tracking-tight"
+            :class="item.label === 'Overdue' && item.value > 0
+              ? 'text-red-500 dark:text-red-400'
+              : 'text-gray-900 dark:text-white'"
+          >{{ item.value }}</dd>
+        </div>
+      </dl>
+    </div>
+
     <!-- My Work section (tasks module) -->
     <div v-if="modulesStore.isEnabled('tasks')">
       <div class="flex items-center justify-between mb-4">
@@ -34,29 +57,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Stats -->
-    <div v-if="modulesStore.isEnabled('tasks') || modulesStore.isEnabled('roadmap')">
-      <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Overview</h2>
-      <dl v-if="statsLoading" class="grid grid-cols-2 gap-4 sm:grid-cols-5">
-        <div v-for="i in 5" :key="i" class="h-24 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
-      </dl>
-      <dl v-else class="grid grid-cols-2 gap-4 sm:grid-cols-5">
-        <div
-          v-for="item in visibleStats"
-          :key="item.label"
-          class="overflow-hidden rounded-xl bg-white dark:bg-gray-800 px-5 py-5 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700"
-        >
-          <dt class="truncate text-sm font-medium text-gray-500 dark:text-gray-400">{{ item.label }}</dt>
-          <dd
-            class="mt-1 text-3xl font-semibold tracking-tight"
-            :class="item.label === 'Overdue' && item.value > 0
-              ? 'text-red-500 dark:text-red-400'
-              : 'text-gray-900 dark:text-white'"
-          >{{ item.value }}</dd>
-        </div>
-      </dl>
     </div>
   </div>
 

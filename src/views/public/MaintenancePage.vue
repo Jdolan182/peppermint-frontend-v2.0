@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-50 flex flex-col px-4">
     <div class="flex-1 flex items-center justify-center">
       <div class="text-center max-w-sm w-full">
-        <div class="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center mx-auto">
+        <div class="w-14 h-14 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto">
           <span class="text-white font-bold text-xl">{{ initial }}</span>
         </div>
         <h1 class="mt-6 text-2xl font-bold text-gray-900">{{ siteName }}</h1>
@@ -16,7 +16,7 @@
           v-model="password"
           type="password"
           placeholder="Staff access"
-          class="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
         />
         <button
           type="submit"

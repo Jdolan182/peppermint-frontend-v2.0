@@ -43,12 +43,12 @@ const login = async ({ params, form }) => {
     <!-- Left branding panel -->
     <div class="hidden lg:flex lg:w-1/2 flex-col items-center justify-center bg-indigo-600 px-12 text-white">
       <div class="max-w-md">
-        <div class="flex items-center gap-3 mb-8">
+        <RouterLink to="/" class="flex items-center gap-3 mb-8 w-fit">
           <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-            <span class="text-white font-bold text-lg">P</span>
+            <span class="text-white font-bold text-lg">{{ siteName[0]?.toUpperCase() }}</span>
           </div>
           <span class="text-2xl font-bold">{{ siteName }}</span>
-        </div>
+        </RouterLink>
         <h1 class="text-4xl font-bold leading-tight">
           Manage your content with confidence
         </h1>
