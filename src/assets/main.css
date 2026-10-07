@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* The "prose" classes on rich-text blocks (Content, Hero) come from this plugin. */
+@plugin "@tailwindcss/typography";
 
 /* Make dark: utilities respond to .dark class on <html> instead of OS media query */
 @custom-variant dark (&:where(.dark, .dark *));
